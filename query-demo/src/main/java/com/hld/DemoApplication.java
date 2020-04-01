@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication
 @MapperScan("com.techcomer.admin.mapper")
-@ComponentScan(basePackages = {"com.hld"})
+//@ComponentScan(basePackages = {"com.hld"})
 public class DemoApplication {
 
     public static void main(String[] args) {
