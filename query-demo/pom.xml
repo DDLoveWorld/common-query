@@ -28,9 +28,9 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>mysql</groupId>-->
-            <!--<artifactId>mysql-connector-java</artifactId>-->
-            <!--<version>8.0.16</version>-->
+        <!--<groupId>mysql</groupId>-->
+        <!--<artifactId>mysql-connector-java</artifactId>-->
+        <!--<version>8.0.16</version>-->
         <!--</dependency>-->
 
         <dependency>
@@ -43,5 +43,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <!-- 只有web模块才可用此插件，不然maven无法打包-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
