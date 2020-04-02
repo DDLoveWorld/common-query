@@ -1,6 +1,7 @@
 package com.hld.query.exception;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 自定义异常
@@ -11,6 +12,7 @@ import lombok.Data;
  * @date 2019/1/10
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class CommonException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
