@@ -12,11 +12,11 @@
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description>Common query demo project for Spring Boot</description>
 
     <properties>
-        <global.version>1.0.0</global.version>
+        <global.version>1.0.1</global.version>
     </properties>
 
     <dependencies>
@@ -25,7 +25,6 @@
 
     <modules>
         <module>query-common</module>
-        <module>query-demo</module>
     </modules>
 
     <!--发布到maven仓库-->
@@ -49,17 +48,17 @@
                 <pluginManagement>
                     <plugins>
                         <!--这是自动发布的插件-->
-                        <plugin>
-                            <groupId>org.sonatype.plugins</groupId>
-                            <artifactId>nexus-staging-maven-plugin</artifactId>
-                            <version>1.6.3</version>
-                            <extensions>true</extensions>
-                            <configuration>
-                                <serverId>releases</serverId>
-                                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                                <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            </configuration>
-                        </plugin>
+                        <!--<plugin>-->
+                            <!--<groupId>org.sonatype.plugins</groupId>-->
+                            <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
+                            <!--<version>1.6.3</version>-->
+                            <!--<extensions>true</extensions>-->
+                            <!--<configuration>-->
+                                <!--<serverId>releases</serverId>-->
+                                <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
+                                <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+                            <!--</configuration>-->
+                        <!--</plugin>-->
 
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
@@ -110,7 +109,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>3.0.1</version>
+                            <version>3.0.0</version>
                             <executions>
                                 <execution>
                                     <id>attach-javadocs</id>
