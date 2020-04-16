@@ -40,4 +40,9 @@ public class QueryOptions {
      * 每页条数
      */
     private Long limit;
+
+    /**
+     * 最先拼接参数
+     */
+    private String firstSql;
 }

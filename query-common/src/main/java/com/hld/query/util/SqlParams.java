@@ -16,6 +16,7 @@ public interface SqlParams {
     String SQL_SELECT = "SELECT ";
     String SQL_FROM = " FROM ";
     String SQL_WHERE = " WHERE ";
+    String SQL_AND = " AND ";
 
     String SQL_SINGLE_QUOTE = "'";
 

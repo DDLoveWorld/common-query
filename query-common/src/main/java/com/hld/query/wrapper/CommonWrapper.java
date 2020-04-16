@@ -5,12 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.SharedString;
 import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
-import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
-import com.hld.query.params.*;
-import com.hld.query.util.*;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
+import com.hld.query.params.*;
+import com.hld.query.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -34,9 +33,15 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     private List<IOrderBy> orderBys;
     private Long curPage = null;
     private Long limit = null;
+    private String firstSql = null;
 
     public CommonWrapper() {
         this((T) null);
+    }
+
+    @Override
+    protected CommonWrapper<T> instance() {
+        return null;
     }
 
     public CommonWrapper(T entity) {
@@ -55,6 +60,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             this.orderBys = options.getOrderBys();
             this.curPage = options.getCurPage();
             this.limit = options.getLimit();
+            this.firstSql = options.getFirstSql();
             splitColumns(this, columns);
             splitFilters(this, filters, false);
             splitOrderBy(this, orderBys);
@@ -63,7 +69,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
 
     public CommonWrapper(QueryOptions options) {
         this.sqlSelect = new SharedString();
-        super.setEntity(entity);
+        // super.setEntity(entity);
         super.initNeed();
         if (options != null) {
             this.filters = options.getFilters();
@@ -71,6 +77,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             this.orderBys = options.getOrderBys();
             this.curPage = options.getCurPage();
             this.limit = options.getLimit();
+            this.firstSql = options.getFirstSql();
             splitColumns(this, columns);
             splitFilters(this, filters, false);
             splitOrderBy(this, orderBys);
@@ -95,6 +102,14 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
 
     public Long getLimit() {
         return limit;
+    }
+
+    public String getFirstSql() {
+        return firstSql;
+    }
+
+    public void setFirstSql(String firstSql) {
+        this.firstSql = firstSql;
     }
 
     /**
@@ -149,7 +164,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     private CommonWrapper(T entity, Class<T> entityClass, AtomicInteger paramNameSeq, Map<String, Object> paramNameValuePairs, MergeSegments mergeSegments, SharedString lastSql, SharedString sqlComment) {
         this.sqlSelect = new SharedString();
         super.setEntity(entity);
-        this.entityClass = entityClass;
+        // this.entityClass = entityClass;
         this.paramNameSeq = paramNameSeq;
         this.paramNameValuePairs = paramNameValuePairs;
         this.expression = mergeSegments;
@@ -168,14 +183,12 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
 
     @Override
     public CommonWrapper<T> select(Predicate<TableFieldInfo> predicate) {
-        return this.select(this.entityClass, predicate);
+        return null;
     }
 
     @Override
     public CommonWrapper<T> select(Class<T> entityClass, Predicate<TableFieldInfo> predicate) {
-        this.entityClass = entityClass;
-        this.sqlSelect.setStringValue(TableInfoHelper.getTableInfo(this.getCheckEntityClass()).chooseSelect(predicate));
-        return (CommonWrapper) this.typedThis;
+        return null;
     }
 
     @Override
@@ -183,14 +196,6 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return this.sqlSelect.getStringValue();
     }
 
-    public LambdaCommonWrapper<T> lambda() {
-        return new LambdaCommonWrapper(this.entity, this.entityClass, this.sqlSelect, this.paramNameSeq, this.paramNameValuePairs, this.expression, this.lastSql, this.sqlComment);
-    }
-
-    @Override
-    protected CommonWrapper<T> instance() {
-        return new CommonWrapper(this.entity, this.entityClass, this.paramNameSeq, this.paramNameValuePairs, new MergeSegments(), SharedString.emptyString(), SharedString.emptyString());
-    }
 
     /**
      * 构造查询SQL条件
@@ -498,5 +503,4 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         }
         return list;
     }
-
 }

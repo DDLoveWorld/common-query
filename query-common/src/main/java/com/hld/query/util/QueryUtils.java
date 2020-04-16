@@ -191,11 +191,14 @@ public class QueryUtils {
 
     public static String splitWhereSql(CommonWrapper wrapper) {
         if (wrapper == null) {
-            throw new CommonException(ErrorCode.NOT_NULL, "wrapper is not null");
+            throw new CommonException(ErrorCode.NOT_NULL);
         }
         String sql = wrapper.getSqlSegment();
         Map<String, Object> map = wrapper.getParamNameValuePairs();
         if (StringUtils.isEmpty(sql) || map == null) {
+            if (StringUtils.isNotBlank(wrapper.getFirstSql())) {
+                return wrapper.getFirstSql();
+            }
             return SqlParams.SQL_NO_WHERE_SQL;
         }
         List<IOrderBy> orderBys = wrapper.getOrderBys();
@@ -203,6 +206,9 @@ public class QueryUtils {
         boolean isFilter = filters == null || filters.size() == 0;
         boolean isOrder = orderBys != null && orderBys.size() > 0;
         if (isOrder && isFilter) {
+            if (StringUtils.isNotBlank(wrapper.getFirstSql())) {
+                return wrapper.getFirstSql() + sql;
+            }
             //无筛选条件但是有排序条件情况下
             return SqlParams.SQL_NO_WHERE_SQL + sql;
         }
@@ -213,6 +219,9 @@ public class QueryUtils {
             Object mapValue = entry.getValue();
             //将引用参数转换为实参
             sql = sql.replace(replaceStr, mapValue == null ? "" : SqlParams.SQL_SINGLE_QUOTE + mapValue.toString() + SqlParams.SQL_SINGLE_QUOTE);
+        }
+        if (StringUtils.isNotBlank(wrapper.getFirstSql())) {
+            return wrapper.getFirstSql() + SqlParams.SQL_AND + sql;
         }
         return sql;
     }
