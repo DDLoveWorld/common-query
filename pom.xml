@@ -12,7 +12,7 @@
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPHOST</version>
+    <version>1.0.0</version>
     <description>Common query demo project for Spring Boot</description>
 
     <properties>
@@ -42,10 +42,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
-    <modules>
-        <module>query-common</module>
-    </modules>
 
     <!--发布到maven仓库-->
 
@@ -129,21 +125,21 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>3.2.0</version>
-<!--                            <executions>-->
-<!--                                <execution>-->
-<!--                                    <id>attach-javadocs</id>-->
-<!--                                    <phase>package</phase>-->
-<!--                                    <goals>-->
-<!--                                        <goal>jar</goal>-->
-<!--                                    </goals>-->
-<!--                                    &lt;!&ndash; java8版本导致javadoc打包编译失败时候，添加&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <failOnError>false</failOnError>&ndash;&gt;-->
-<!--&lt;!&ndash;                                        <doclint>none</doclint>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    </configuration>&ndash;&gt;-->
-<!--                                </execution>-->
-<!--                            </executions>-->
+                            <version>3.0.1</version>
+                            <executions>
+                                <execution>
+                                    <id>attach-javadocs</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>jar</goal>
+                                    </goals>
+                                    <!-- java8版本导致javadoc打包编译失败时候，添加-->
+                                    <configuration>
+                                        <failOnError>false</failOnError>
+                                        <doclint>none</doclint>
+                                    </configuration>
+                                </execution>
+                            </executions>
                         </plugin>
 
                     </plugins>
