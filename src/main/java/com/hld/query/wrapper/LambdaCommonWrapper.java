@@ -23,16 +23,19 @@ import java.util.function.Predicate;
 public class LambdaCommonWrapper<T> extends AbstractLambdaWrapper<T, LambdaCommonWrapper<T>> implements Query<LambdaCommonWrapper<T>, T, SFunction<T, ?>> {
     private SharedString sqlSelect;
 
+    @SuppressWarnings("unchecked")
     public LambdaCommonWrapper() {
-        this((T) null);
+        this(null);
     }
 
+    @SuppressWarnings("unchecked")
     public LambdaCommonWrapper(T entity) {
         this.sqlSelect = new SharedString();
         super.setEntity(entity);
         super.initNeed();
     }
 
+    @SuppressWarnings("unchecked")
     LambdaCommonWrapper(T entity, Class<T> entityClass, SharedString sqlSelect, AtomicInteger paramNameSeq, Map<String, Object> paramNameValuePairs, MergeSegments mergeSegments, SharedString lastSql, SharedString sqlComment) {
         this.sqlSelect = new SharedString();
         super.setEntity(entity);
@@ -45,6 +48,7 @@ public class LambdaCommonWrapper<T> extends AbstractLambdaWrapper<T, LambdaCommo
         this.sqlComment = sqlComment;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @SafeVarargs
     public final LambdaCommonWrapper<T> select(SFunction... columns) {
@@ -52,28 +56,32 @@ public class LambdaCommonWrapper<T> extends AbstractLambdaWrapper<T, LambdaCommo
             this.sqlSelect.setStringValue(this.columnsToString(false, columns));
         }
 
-        return (LambdaCommonWrapper) this.typedThis;
+        return this.typedThis;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public LambdaCommonWrapper<T> select(Predicate<TableFieldInfo> predicate) {
         return this.select(this.entityClass, predicate);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public LambdaCommonWrapper<T> select(Class<T> entityClass, Predicate<TableFieldInfo> predicate) {
         this.entityClass = entityClass;
         this.sqlSelect.setStringValue(TableInfoHelper.getTableInfo(this.getCheckEntityClass()).chooseSelect(predicate));
-        return (LambdaCommonWrapper) this.typedThis;
+        return this.typedThis;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String getSqlSelect() {
         return this.sqlSelect.getStringValue();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected LambdaCommonWrapper<T> instance() {
-        return new LambdaCommonWrapper(this.entity, this.entityClass, (SharedString) null, this.paramNameSeq, this.paramNameValuePairs, new MergeSegments(), SharedString.emptyString(), SharedString.emptyString());
+        return new LambdaCommonWrapper(this.entity, this.entityClass, null, this.paramNameSeq, this.paramNameValuePairs, new MergeSegments(), SharedString.emptyString(), SharedString.emptyString());
     }
 }

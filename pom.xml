@@ -17,10 +17,30 @@
 
     <properties>
         <global.version>1.0.1</global.version>
+        <chartset.UTF8>UTF-8</chartset.UTF8>
+        <mybatis.plus.version>3.1.2</mybatis.plus.version>
+        <lombok.version>1.18.10</lombok.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus</artifactId>
+            <version>${mybatis.plus.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis.plus.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <modules>
@@ -109,23 +129,22 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>3.0.0</version>
-                            <executions>
-                                <execution>
-                                    <id>attach-javadocs</id>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>jar</goal>
-                                    </goals>
-                                    <!-- java8版本导致javadoc打包编译失败时候，添加-->
-                                    <configuration>
-                                        <failOnError>false</failOnError>
-                                        <doclint>none</doclint>
-                                    </configuration>
-                                </execution>
-                            </executions>
+                            <version>3.2.0</version>
+<!--                            <executions>-->
+<!--                                <execution>-->
+<!--                                    <id>attach-javadocs</id>-->
+<!--                                    <phase>package</phase>-->
+<!--                                    <goals>-->
+<!--                                        <goal>jar</goal>-->
+<!--                                    </goals>-->
+<!--                                    &lt;!&ndash; java8版本导致javadoc打包编译失败时候，添加&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <failOnError>false</failOnError>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <doclint>none</doclint>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    </configuration>&ndash;&gt;-->
+<!--                                </execution>-->
+<!--                            </executions>-->
                         </plugin>
-
 
                     </plugins>
                 </pluginManagement>
