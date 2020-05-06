@@ -60,21 +60,25 @@
 
         <profile>
             <id>release</id>
+            <!-- 指定profile只在JDK版本大于等于1.8时有效-->
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
             <build>
                 <pluginManagement>
                     <plugins>
                         <!--这是自动发布的插件-->
-                        <!--<plugin>-->
-                            <!--<groupId>org.sonatype.plugins</groupId>-->
-                            <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
-                            <!--<version>1.6.3</version>-->
-                            <!--<extensions>true</extensions>-->
-                            <!--<configuration>-->
-                                <!--<serverId>releases</serverId>-->
-                                <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
-                                <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
-                            <!--</configuration>-->
-                        <!--</plugin>-->
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <version>1.6.3</version>
+                            <extensions>true</extensions>
+                            <configuration>
+                                <serverId>releases</serverId>
+                                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                                <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            </configuration>
+                        </plugin>
 
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
@@ -144,22 +148,24 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.7</version>
+                            <configuration>
+                                <additionalOptions>
+                                    <additionalOption>-Xdoclint:none</additionalOption>
+                                </additionalOptions>
+                            </configuration>
                             <executions>
                                 <execution>
                                     <id>attach-javadocs</id>
                                     <goals>
                                         <goal>jar</goal>
                                     </goals>
-                                    <configuration>
-                                        <additionalparam>-Xdoclint:none</additionalparam>
-                                    </configuration>
                                 </execution>
                             </executions>
                         </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
+
         </profile>
     </profiles>
     <licenses>
