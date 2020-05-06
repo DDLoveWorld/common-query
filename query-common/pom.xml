@@ -5,7 +5,7 @@
     <parent>
         <artifactId>common-query</artifactId>
         <groupId>com.github.DDLoveWorld</groupId>
-        <version>1.0.1</version>
+        <version>1.0.1-SNAPHOST</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

@@ -43,6 +43,10 @@ public class CommonException extends RuntimeException {
         this.msg = msg;
     }
 
+    public CommonException(int code) {
+        this.code = code;
+    }
+
     public CommonException(String msg, Throwable e) {
         super(msg, e);
         this.code = ErrorCode.INTERNAL_SERVER_ERROR;

@@ -12,7 +12,7 @@
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1</version>
+    <version>1.0.1-SNAPHOST</version>
     <description>Common query demo project for Spring Boot</description>
 
     <properties>
