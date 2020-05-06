@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <version>1.0.0</version>
     <description>Common query demo project for Spring Boot</description>
 
