@@ -36,7 +36,7 @@ public class MapUtils {
         if (params == null) {
             throw new CommonException(ErrorCode.NOT_NULL, "参数");
         }
-        Map<String, Object> map = new HashMap(16);
+        HashMap<String, Object> map = new HashMap<String, Object>(16);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             String mapKey = entry.getKey();
             Object mapValue = entry.getValue();
@@ -63,7 +63,7 @@ public class MapUtils {
      * @param params 待转换
      * @return 结果
      */
-    public static List<Map<String, Object>> keysToCamelByList(List<Map> params) {
+    public static List<Map<String, Object>> keysToCamelByList(List<Map<String, Object>> params) {
         List<Map<String, Object>> list = new ArrayList<>(12);
         if (params != null && params.size() > 0) {
             for (Map<String, Object> m : params) {
@@ -83,17 +83,17 @@ public class MapUtils {
     /**
      * Clob类型 转String
      *
-     * @param clob
-     * @return
-     * @throws SQLException
-     * @throws IOException
+     * @param clob 大文本
+     * @return 结果
+     * @throws SQLException SQL
+     * @throws IOException io
      */
     private static String clobtostring(Clob clob) throws SQLException, IOException {
         String ret = "";
         Reader read = clob.getCharacterStream();
         BufferedReader br = new BufferedReader(read);
         String s = br.readLine();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (s != null) {
             sb.append(s);
             s = br.readLine();

@@ -641,7 +641,7 @@ public class QueryUtils {
         String relation = getRelation(c);
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
-        List<Map> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
+        List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
         return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map), total, wrapper.getCurPage()));
     }
 
@@ -661,7 +661,7 @@ public class QueryUtils {
         CommonWrapper wrapper = new CommonWrapper(splitOptions(params, c));
         String relation = getRelation(c);
         String whereSql = splitSql(wrapper);
-        List<Map> result = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
+        List<Map<String, Object>> result = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
         return MapUtils.keysToCamelByList(result);
     }
 
