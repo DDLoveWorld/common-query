@@ -29,8 +29,8 @@ public class MapUtils {
      * 转换map中key为下划线为驼峰式
      * ABC_DE => absDe , abc_de=>abcDe
      *
-     * @param params
-     * @return
+     * @param params 待转换数据
+     * @return 结果
      */
     public static Map<String, Object> keysToCamel(Map<String, Object> params) throws IOException, SQLException {
         if (params == null) {
@@ -60,8 +60,8 @@ public class MapUtils {
      * 转换map中key为下划线为驼峰式
      * ABC_DE => absDe , abc_de=>abcDe
      *
-     * @param params
-     * @return
+     * @param params 待转换
+     * @return 结果
      */
     public static List<Map<String, Object>> keysToCamelByList(List<Map> params) {
         List<Map<String, Object>> list = new ArrayList<>(12);
@@ -72,9 +72,7 @@ public class MapUtils {
                         continue;
                     }
                     list.add(keysToCamel(m));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SQLException e) {
+                } catch (IOException | SQLException e) {
                     e.printStackTrace();
                 }
             }
