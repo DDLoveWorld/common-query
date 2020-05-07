@@ -23,7 +23,7 @@ public interface CommonMapper<T> extends BaseMapper<T> {
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 查询结果集
      */
     @Select("select ${columns} from ${relation} where ${conditions}")
     List<Map> commonQuery(@Param("columns") String columns, @Param("conditions") String conditions, @Param("relation") String relation);
@@ -33,7 +33,7 @@ public interface CommonMapper<T> extends BaseMapper<T> {
      * 所有拼接参数由代码生成
      *
      * @param sqlParams 完整版sql语句
-     * @return
+     * @return 查询结果集
      */
     @Select("${sqlParams}")
     List<Map> commonQueryByParams(@Param("sqlParams") String sqlParams);
@@ -41,9 +41,9 @@ public interface CommonMapper<T> extends BaseMapper<T> {
     /**
      * 获取总条数
      *
-     * @param conditions
-     * @param relation
-     * @return
+     * @param conditions 查询条件
+     * @param relation   表关系
+     * @return 返回结果总条数
      */
     @Select("select count(*) from ${relation} where ${conditions}")
     Long commonQueryCount(@Param("conditions") String conditions, @Param("relation") String relation);
@@ -54,7 +54,7 @@ public interface CommonMapper<T> extends BaseMapper<T> {
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 查询结果实体
      */
     @Select("select ${columns} from ${relation} where ${conditions}")
     List<T> commonQueryReturnEntity(@Param("columns") String columns, @Param("conditions") String conditions, @Param("relation") String relation);
@@ -65,7 +65,7 @@ public interface CommonMapper<T> extends BaseMapper<T> {
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 查询结果实体
      */
     @Select("select ${columns} from ${relation} where ${conditions}")
     List<Object> commonQueryReturnObject(@Param("columns") String columns, @Param("conditions") String conditions, @Param("relation") String relation);

@@ -508,7 +508,7 @@ public class QueryUtils {
      */
     public static String getRelation(Class c) {
         Annotation[] classAnnotations = c.getDeclaredAnnotations();
-        if (classAnnotations != null && classAnnotations.length > 0) {
+        if (classAnnotations.length > 0) {
             for (int i = 0; i < classAnnotations.length; i++) {
                 Annotation annotation = classAnnotations[i];
                 if (annotation instanceof TableRelations) {
@@ -608,7 +608,7 @@ public class QueryUtils {
             default:
                 break;
         }
-        return sqlParams;
+        return sqlParams.toUpperCase();
     }
 
     /**
@@ -629,7 +629,7 @@ public class QueryUtils {
      * @param baseMapper 当前业务mapper
      * @param params     查询参数
      * @param c          当前业务VO类
-     * @param type       当前数据库类型
+     * @param type       当前数据库类型（默认为Mysql）
      * @return
      */
     public static Result getResult(CommonMapper baseMapper, QueryOptions params, Class c, DatabaseType type) {

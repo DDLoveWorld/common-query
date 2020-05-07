@@ -126,30 +126,13 @@
                                 </execution>
                             </executions>
                         </plugin>
-<!--                        <plugin>-->
-<!--                            <groupId>org.apache.maven.plugins</groupId>-->
-<!--                            <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--                            <version>3.0.1</version>-->
-<!--                            <executions>-->
-<!--                                <execution>-->
-<!--                                    <id>attach-javadocs</id>-->
-<!--                                    <phase>package</phase>-->
-<!--                                    <goals>-->
-<!--                                        <goal>jar</goal>-->
-<!--                                    </goals>-->
-<!--                                    &lt;!&ndash; java8版本导致javadoc打包编译失败时候，添加&ndash;&gt;-->
-<!--                                    <configuration>-->
-<!--                                        <failOnError>false</failOnError>-->
-<!--                                        <doclint>none</doclint>-->
-<!--                                    </configuration>-->
-<!--                                </execution>-->
-<!--                            </executions>-->
-<!--                        </plugin>-->
+
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
                             <configuration>
                                 <additionalOptions>
+                                    <!-- 解决jdk1.8以后编译出错问题-->
                                     <additionalOption>-Xdoclint:none</additionalOption>
                                 </additionalOptions>
                             </configuration>

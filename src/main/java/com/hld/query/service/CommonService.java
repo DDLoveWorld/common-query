@@ -20,7 +20,7 @@ public interface CommonService<T> extends IService<T> {
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 返回map结果集
      */
     List<Map> commonQuery(String columns, String conditions, String relation);
 
@@ -28,7 +28,7 @@ public interface CommonService<T> extends IService<T> {
      * sql
      *
      * @param sqlParams 完整版SQL查询语句
-     * @return
+     * @return 返回map结果集
      */
     List<Map> commonQueryByParams(String sqlParams);
 
@@ -37,7 +37,7 @@ public interface CommonService<T> extends IService<T> {
      *
      * @param conditions
      * @param relation
-     * @return
+     * @return 返回总条数
      */
     Long commonQueryCount(String conditions, String relation);
 
@@ -47,7 +47,7 @@ public interface CommonService<T> extends IService<T> {
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 返回实体结果集
      */
     List<T> commonQueryReturnEntity(String columns, String conditions, String relation);
 

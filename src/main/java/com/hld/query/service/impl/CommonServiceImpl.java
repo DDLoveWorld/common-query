@@ -23,7 +23,7 @@ public class CommonServiceImpl<M extends CommonMapper<T>, T> extends ServiceImpl
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 返回map结果集
      */
     @Transactional(rollbackFor = {Exception.class})
     public List<Map> commonQuery(String columns, String conditions, String relation) {
@@ -32,7 +32,7 @@ public class CommonServiceImpl<M extends CommonMapper<T>, T> extends ServiceImpl
 
     /**
      * @param sqlParams
-     * @return
+     * @return 返回map结果集
      */
     @Transactional(rollbackFor = {Exception.class})
     public List<Map> commonQueryByParams(String sqlParams) {
@@ -45,7 +45,7 @@ public class CommonServiceImpl<M extends CommonMapper<T>, T> extends ServiceImpl
      *
      * @param conditions
      * @param relation
-     * @return
+     * @return 返回查询结果总条数
      */
     @Transactional(rollbackFor = {Exception.class})
     public Long commonQueryCount(String conditions, String relation) {
@@ -59,7 +59,7 @@ public class CommonServiceImpl<M extends CommonMapper<T>, T> extends ServiceImpl
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系
-     * @return
+     * @return 返回实体结果集
      */
     @Transactional(rollbackFor = {Exception.class})
     public List<T> commonQueryReturnEntity(String columns, String conditions, String relation) {

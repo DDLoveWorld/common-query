@@ -31,7 +31,7 @@ public @interface TableFiledInfo {
     String tableAlias() default "";
 
     /**
-     * 当当前字段命名规范非数据库字段转为驼峰格式命名的情况下，将此参数赋值数据库字段名称
+     * 当前字段命名规范非数据库字段转为驼峰格式命名的情况下，将此参数赋值数据库字段名称
      *
      * @return
      */
