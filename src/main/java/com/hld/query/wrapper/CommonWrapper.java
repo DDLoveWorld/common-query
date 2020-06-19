@@ -145,8 +145,9 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             if (log.isDebugEnabled()) {
                 log.debug("common wrapper columns:[{}]", columns.toString());
             }
-            //校验是否有SQL注入风险
-            columns = SqlFilter.sqlInject(columns);
+            //校验是否有SQL注入风险,将校验操作提前
+            //列没有注入风险
+//            columns = SqlFilter.sqlInject(columns);
             wrapper.select(columns.toArray(new String[columns.size()]));
         } else {
             wrapper.select(" * ");

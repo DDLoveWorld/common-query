@@ -20,7 +20,7 @@ public @interface TableRelations {
      *
      * @return
      */
-    String relation() default "";
+    String mRelation() default "";
 
     /**
      * 表关系中主表：sys_user

@@ -36,4 +36,21 @@ public @interface TableFiledInfo {
      * @return
      */
     String filedName() default "";
+
+    /**
+     * 字段上直接拼接查询SQL 示例：（select name form sys_dept id = 2）deptName
+     * 此项不为空时，tableName、tableAlias、filedName属性失效
+     *
+     * @return
+     */
+    String filedSql() default "";
+
+    /**
+     * 此字段与主表的表间关系，可以在需要此字段返回的时候进行表关联，减少性能开销
+     *
+     * @return
+     */
+    String relation() default "";
+
+
 }

@@ -14,6 +14,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 自定义查询工具类
@@ -45,6 +46,32 @@ public class QueryUtils {
         }
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
+        List<String> columns = params.getColumns();
+        //筛选返回列是否合法
+        columns = splitColumns(columns, tableInfos);
+        params.setColumns(columns);
+        List<IFilter> filters = params.getFilters();
+        //筛选过滤条件是否合法
+        filters = splitFilterNameAlias(filters, tableInfos);
+        params.setFilters(filters);
+        List<IOrderBy> orderBys = params.getOrderBys();
+        //筛选排序参数是否合法
+        orderBys = splitOrderBys(orderBys, tableInfos);
+        params.setOrderBys(orderBys);
+        return params;
+    }
+
+    /**
+     * 二次拼接查询参数
+     *
+     * @param params
+     * @param tableInfos 反射列
+     * @return
+     */
+    public static QueryOptions splitOptions(QueryOptions params, List<TableInfo> tableInfos) {
+        if (params == null) {
+            return null;
+        }
         List<String> columns = params.getColumns();
         //筛选返回列是否合法
         columns = splitColumns(columns, tableInfos);
@@ -399,13 +426,20 @@ public class QueryUtils {
                 TableInfo tableInfo = tableInfos.get(j);
                 String columnName2 = tableInfo.getColumnName();
                 if (columnName.equals(columnName2)) {
-                    //当tableFieldName  不为空时，采用此值为数据库字段值（及columnName非数据库字段值的情况）
-                    if (StringUtils.isNotEmpty(tableInfo.getTableFieldName())) {
-                        builder.append(SqlParams.SQL_OPEN_PAREN).append(tableInfo.getTableAlias().toUpperCase())
-                                .append(SqlParams.SQL_POINT).append(ReflexUtil.humpToUnderline(tableInfo.getTableFieldName()))
+                    String filedSql = tableInfo.getFiledSql();
+                    if (StringUtils.isNotBlank(filedSql)) {
+                        //当filedSql不为空时，直接拼接此内容到字段上
+                        builder.append(SqlParams.SQL_OPEN_PAREN).append(filedSql)
                                 .append(SqlParams.SQL_CLOSE_PAREN).append(ReflexUtil.humpToUnderline(columnName));
                     } else {
-                        builder.append(tableInfo.getTableAlias().toUpperCase()).append(SqlParams.SQL_POINT).append(ReflexUtil.humpToUnderline(columnName2));
+                        //当tableFieldName  不为空时，采用此值为数据库字段值（及columnName非数据库字段值的情况）
+                        if (StringUtils.isNotEmpty(tableInfo.getTableFieldName())) {
+                            builder.append(SqlParams.SQL_OPEN_PAREN).append(tableInfo.getTableAlias().toUpperCase())
+                                    .append(SqlParams.SQL_POINT).append(ReflexUtil.humpToUnderline(tableInfo.getTableFieldName()))
+                                    .append(SqlParams.SQL_CLOSE_PAREN).append(ReflexUtil.humpToUnderline(columnName));
+                        } else {
+                            builder.append(tableInfo.getTableAlias().toUpperCase()).append(SqlParams.SQL_POINT).append(ReflexUtil.humpToUnderline(columnName2));
+                        }
                     }
                     columns.set(i, builder.toString());
                     break;
@@ -443,6 +477,17 @@ public class QueryUtils {
                 Collections.addAll(allFields, parentFields);
             }
         }
+        // 查询父类的属性 查询所有，不建议此操作
+//        while (parentClass != null) {
+//            if (Object.class.equals(parentClass)) {
+//                break;
+//            }
+//            Field[] parentFields = parentClass.getDeclaredFields();
+//            if (parentFields.length != 0) {
+//                Collections.addAll(allFields, parentFields);
+//            }
+//            parentClass = parentClass.getSuperclass();
+//        }
         //添加子类字段
         Field[] fields = c.getDeclaredFields();
         if (null != fields && fields.length != 0) {
@@ -453,7 +498,7 @@ public class QueryUtils {
             for (int i = 0; i < classAnnotations.length; i++) {
                 Annotation annotation = classAnnotations[i];
                 if (annotation instanceof TableRelations) {
-                    tableRelations = ((TableRelations) annotation).relation();
+                    tableRelations = ((TableRelations) annotation).mRelation();
                     if (StringUtils.isEmpty(tableRelations)) {
                         throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "注解参数：{relation} 不能为空");
                     }
@@ -482,15 +527,18 @@ public class QueryUtils {
                     String tableName = ((TableFiledInfo) annotation).tableName();
                     String tableAlia = ((TableFiledInfo) annotation).tableAlias();
                     String tableFieldName = ((TableFiledInfo) annotation).filedName();
+                    String filedSql = ((TableFiledInfo) annotation).filedSql();
+                    String relation = ((TableFiledInfo) annotation).relation();
                     TableInfo tableInfo = new TableInfo();
-                    tableInfo.setTableName(StringUtils.isEmpty(tableName) ? mTableName : tableName);
                     if (StringUtils.isEmpty(tableAlia) && StringUtils.isEmpty(mTableAlias)) {
                         throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "table alias 别名不能为空");
                     }
-                    tableInfo.setTableAlias(StringUtils.isEmpty(tableAlia) ? mTableAlias : tableAlia);
-                    tableInfo.setTableFieldName(tableFieldName);
-                    tableInfo.setColumnName(fieldName);
-                    tableInfo.setAttrType(typeName);
+                    tableInfo.setTableName(StringUtils.isEmpty(tableName) ? mTableName : tableName)
+                            .setTableAlias(StringUtils.isEmpty(tableAlia) ? mTableAlias : tableAlia)
+                            .setTableFieldName(tableFieldName).setColumnName(fieldName)
+                            .setAttrType(typeName)
+                            .setFiledSql(filedSql)
+                            .setRelation(relation);
                     tableInfos.add(tableInfo);
                 }
             }
@@ -512,7 +560,7 @@ public class QueryUtils {
             for (int i = 0; i < classAnnotations.length; i++) {
                 Annotation annotation = classAnnotations[i];
                 if (annotation instanceof TableRelations) {
-                    String tableRelations = ((TableRelations) annotation).relation();
+                    String tableRelations = ((TableRelations) annotation).mRelation();
                     if (StringUtils.isEmpty(tableRelations)) {
                         throw new CommonException(ErrorCode.PARAMS_GET_ERROR, c.getName() + "需添加表间关系参数");
                     }
@@ -526,6 +574,22 @@ public class QueryUtils {
             throw new CommonException(ErrorCode.PARAMS_GET_ERROR, c.getName() + "需添加表间关系注解 TableRelations");
         }
         return "";
+    }
+
+    public static String getRelation(String relation, List<String> columns, List<TableInfo> tableInfos) {
+        StringBuffer buffer = new StringBuffer(relation);
+        Set<String> relations = new HashSet<>(12);
+        for (String column : columns) {
+            List<TableInfo> collect = tableInfos.parallelStream().filter(r -> r.getColumnName().equals(column)).collect(Collectors.toList());
+            System.out.println("curRelation : " + collect.toString());
+            if (collect.size() > 0) {
+                relations.add(collect.get(0).getRelation());
+            }
+        }
+        for (String s : relations) {
+            buffer.append(" ").append(s);
+        }
+        return buffer.toString();
     }
 
     /**
@@ -637,41 +701,27 @@ public class QueryUtils {
             type = DatabaseType.MYSQL;
         }
         log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, c));
-        String relation = getRelation(c);
+        List<String> columns = params.getColumns();
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
         List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
         return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map), total, wrapper.getCurPage()));
     }
 
-    /**
-     * 返回查询的结果，用于工作流查询业务详情
-     *
-     * @param baseMapper 当前业务mapper
-     * @param params     查询参数
-     * @param c          当前业务VO类
-     * @param type       当前数据库类型
-     * @return
-     */
-    public static List<Map<String, Object>> getReturnMap(CommonMapper baseMapper, QueryOptions params, Class c, DatabaseType type) {
-        if (type == null) {
-            type = DatabaseType.MYSQL;
-        }
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, c));
-        String relation = getRelation(c);
-        String whereSql = splitSql(wrapper);
-        List<Map<String, Object>> result = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
-        return MapUtils.keysToCamelByList(result);
-    }
-
-
     public static String testSql(QueryOptions params, Class c, DatabaseType type) {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, c));
-        String relation = getRelation(c);
+        List<String> columns = new ArrayList<>(12);
+        columns.addAll(params.getColumns());
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         return getCompletedSQL(relation, whereSql, type, wrapper);
     }
