@@ -443,6 +443,17 @@ public class QueryUtils {
                 Collections.addAll(allFields, parentFields);
             }
         }
+        // 查询父类的属性 查询所有，不建议此操作
+//        while (parentClass != null) {
+//            if (Object.class.equals(parentClass)) {
+//                break;
+//            }
+//            Field[] parentFields = parentClass.getDeclaredFields();
+//            if (parentFields.length != 0) {
+//                Collections.addAll(allFields, parentFields);
+//            }
+//            parentClass = parentClass.getSuperclass();
+//        }
         //添加子类字段
         Field[] fields = c.getDeclaredFields();
         if (null != fields && fields.length != 0) {
