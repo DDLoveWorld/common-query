@@ -614,10 +614,26 @@ public class QueryUtils {
      * @return
      */
     public static Long getEndCount(Long curPage, Long limit) {
-//        if (curPage != null && limit != null) {
-//            return curPage * limit;
-//        }
-        return limit;
+
+
+        return getEndCount(curPage, limit, DatabaseType.MYSQL);
+    }
+
+    public static Long getEndCount(Long curPage, Long limit, DatabaseType type) {
+        Long end = 0L;
+        switch (type) {
+            case MYSQL:
+                end = limit;
+                break;
+            case ORACLE:
+                if (curPage != null && limit != null) {
+                    end = curPage * limit;
+                }
+                break;
+            default:
+                break;
+        }
+        return end;
     }
 
     /**
@@ -629,7 +645,7 @@ public class QueryUtils {
      */
     private static String splitPageOracle(String sql, CommonWrapper wrapper) {
         Long start = getStartCount(wrapper.getCurPage(), wrapper.getLimit());
-        Long end = getEndCount(wrapper.getCurPage(), wrapper.getLimit());
+        Long end = getEndCount(wrapper.getCurPage(), wrapper.getLimit(), DatabaseType.ORACLE);
         if (start != null && end != null && start < end) {
             sql = SqlParams.SQL_ORACLE_PAGING1 + sql + SqlParams.SQL_ORACLE_PAGING2 +
                     end + SqlParams.SQL_ORACLE_PAGING3 + start;
