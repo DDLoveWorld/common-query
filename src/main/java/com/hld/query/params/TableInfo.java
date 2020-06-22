@@ -1,6 +1,8 @@
 package com.hld.query.params;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -8,6 +10,8 @@ import lombok.experimental.Accessors;
  * @date 2019/8/23
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Accessors(chain = true)
 public class TableInfo {
     /**
@@ -38,4 +42,14 @@ public class TableInfo {
      * 表间关系
      */
     private String relation;
+
+    /**
+     * 列拼接SQL
+     */
+    private String filedSql;
+
+    /**
+     * 标识当前列是否是查询列
+     */
+    private boolean queryFlag;
 }

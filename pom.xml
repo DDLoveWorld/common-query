@@ -12,7 +12,7 @@
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.1.1</version>
     <description>Common query demo project for Spring Boot</description>
 
     <properties>
@@ -76,7 +76,7 @@
                             <configuration>
                                 <serverId>releases</serverId>
                                 <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                                <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                                <autoReleaseAfterClose>false</autoReleaseAfterClose>
                             </configuration>
                         </plugin>
 
@@ -100,7 +100,6 @@
                                 <target>1.8</target>
                             </configuration>
                         </plugin>
-                        <!-- gpg加密 -->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-gpg-plugin</artifactId>
@@ -114,7 +113,6 @@
                                 </execution>
                             </executions>
                         </plugin>
-                        <!-- 打包源码为jar -->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-source-plugin</artifactId>
@@ -128,13 +126,30 @@
                                 </execution>
                             </executions>
                         </plugin>
-                        <!-- 打包javadoc文档 -->
+<!--                        <plugin>-->
+<!--                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                            <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                            <version>3.0.1</version>-->
+<!--                            <executions>-->
+<!--                                <execution>-->
+<!--                                    <id>attach-javadocs</id>-->
+<!--                                    <phase>package</phase>-->
+<!--                                    <goals>-->
+<!--                                        <goal>jar</goal>-->
+<!--                                    </goals>-->
+<!--                                    &lt;!&ndash; java8版本导致javadoc打包编译失败时候，添加&ndash;&gt;-->
+<!--                                    <configuration>-->
+<!--                                        <failOnError>false</failOnError>-->
+<!--                                        <doclint>none</doclint>-->
+<!--                                    </configuration>-->
+<!--                                </execution>-->
+<!--                            </executions>-->
+<!--                        </plugin>-->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
                             <configuration>
                                 <additionalOptions>
-                                    <!-- 解决jdk1.8以后编译出错问题-->
                                     <additionalOption>-Xdoclint:none</additionalOption>
                                 </additionalOptions>
                             </configuration>

@@ -5,7 +5,9 @@ import com.hld.query.params.IFilter;
 import com.hld.query.params.IOrderBy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.hld.query.params.QueryOptions;
 import com.hld.query.util.QueryUtils;
@@ -26,6 +28,8 @@ public class QueryTest {
         List<String> columns = new ArrayList<>(12);
         columns.add("id");
         columns.add("username");
+        columns.add("deptName");
+        columns.add("workNo");
 
         List<IFilter> filters = new ArrayList<>(12);
 

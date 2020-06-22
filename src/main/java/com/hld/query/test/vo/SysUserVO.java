@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableRelations(relation = "sys_user T left join sys_dept A on A.id = T.dept_id", mTableName = "sys_user")
+@TableRelations(mRelation = "sys_user T", mTableName = "sys_user")
 public class SysUserVO {
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class SysUserVO {
     /**
      * 用户名称
      */
-    @TableFiledInfo()
+    @TableFiledInfo(filedSql = "select name from  sys_dept A where  A.id = T.dept_id")
     private String username;
     /**
      * 真实姓名
@@ -55,12 +55,12 @@ public class SysUserVO {
     @TableFiledInfo()
     private Long deptId;
 
-    @TableFiledInfo(tableName = "sys_dept", tableAlias = "A", filedName = "name")
+    @TableFiledInfo(relation = "left join sys_dept A on A.id = T.dept_id", tableName = "sys_dept", tableAlias = "A", filedName = "name")
     private String deptName;
     /**
      * 员工工号
      */
-    @TableFiledInfo()
+    @TableFiledInfo(relation = "left join sys_menu B on B.id = T.dept_id", tableName = "sys_menu", tableAlias = "B", filedName = "work_num")
     private String workNo;
     /**
      * 状态，1：正常，0：冻结状态，2：删除
