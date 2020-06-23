@@ -399,7 +399,7 @@ public class QueryUtils {
 
     private static List<String> addColumns(List<TableInfo> tableInfos) {
 
-        List<String> collect = tableInfos.stream().map(TableInfo::getColumnName).collect(Collectors.toList());
+        List<String> collect = tableInfos.parallelStream().map(TableInfo::getColumnName).collect(Collectors.toList());
         collect.removeAll(Arrays.asList(forbidColumns));
         return collect;
     }
@@ -577,6 +577,9 @@ public class QueryUtils {
     }
 
     public static String getRelation(String relation, List<String> columns, List<TableInfo> tableInfos) {
+        if(columns==null||columns.size()==0){
+            columns = addColumns(tableInfos);
+        }
         StringBuffer buffer = new StringBuffer(relation);
         Set<String> relations = new HashSet<>(12);
         for (String column : columns) {
