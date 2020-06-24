@@ -723,7 +723,7 @@ public class QueryUtils {
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos),type);
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
@@ -748,7 +748,7 @@ public class QueryUtils {
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos),type);
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
@@ -773,7 +773,7 @@ public class QueryUtils {
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos),type);
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));

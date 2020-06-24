@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
+import com.hld.query.enums.DatabaseType;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
 import com.hld.query.params.*;
@@ -34,6 +35,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     private Long curPage = null;
     private Long limit = null;
     private String firstSql = null;
+    private DatabaseType databaseType = DatabaseType.MYSQL;
 
     public CommonWrapper() {
         this((T) null);
@@ -71,6 +73,26 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         this.sqlSelect = new SharedString();
         // super.setEntity(entity);
         super.initNeed();
+        if (options != null) {
+            this.filters = options.getFilters();
+            this.columns = options.getColumns();
+            this.orderBys = options.getOrderBys();
+            this.curPage = options.getCurPage();
+            this.limit = options.getLimit();
+            this.firstSql = options.getFirstSql();
+            splitColumns(this, columns);
+            splitFilters(this, filters, false);
+            splitOrderBy(this, orderBys);
+        }
+    }
+
+    public CommonWrapper(QueryOptions options, DatabaseType databaseType) {
+        this.sqlSelect = new SharedString();
+        // super.setEntity(entity);
+        super.initNeed();
+        if (databaseType != null) {
+            this.databaseType = databaseType;
+        }
         if (options != null) {
             this.filters = options.getFilters();
             this.columns = options.getColumns();
@@ -483,9 +505,21 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      */
     private void splitDateCondition(CommonWrapper<T> wrapper, IFilter filter, String condition) {
         StringBuilder builder = new StringBuilder();
-        builder.append("date_format(").append(ReflexUtil.humpToUnderline(filter.getFilterName()))
-                .append(",'").append(filter.getDateFormat()).append("') ").append(condition).append(" {0}");
         String value = filter.getFilterValue().get(0) + "";
+        switch (this.databaseType) {
+            case MYSQL:
+                builder.append("date_format(").append(ReflexUtil.humpToUnderline(filter.getFilterName()))
+                        .append(",'").append(filter.getDateFormat()).append("') ").append(condition).append(" {0}");
+                break;
+            case ORACLE:
+                builder.append("to_char(").append(ReflexUtil.humpToUnderline(filter.getFilterName()))
+                        .append(",'").append(filter.getDateFormat()).append("') ").append(condition).append(" {0}");
+//                builder.append(ReflexUtil.humpToUnderline(filter.getFilterName())).append(condition).append(" {0}") ;
+//                value = "to_date('"+value+"','"+filter.getDateFormat()+"')";
+                break;
+            default:
+                break;
+        }
         wrapper.apply(builder.toString(), value);
     }
 
