@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class QueryUtils {
 
-    private static String[] forbidColumns = new String[]{"creator", "createTime", "updater", "updateTime", "tenantId"};
+    public static String[] forbidColumns = new String[]{"creator", "createTime", "updater", "updateTime", "tenantId"};
 
     public static String splitSql(CommonWrapper wrapper) {
         String sql = "";
@@ -94,7 +94,7 @@ public class QueryUtils {
      * @param filters
      * @return
      */
-    private static List<IFilter> splitFilterNameAlias(List<IFilter> filters, Class c) {
+    public static List<IFilter> splitFilterNameAlias(List<IFilter> filters, Class c) {
         if (filters == null || filters.size() == 0) {
             return filters;
         }
@@ -143,7 +143,7 @@ public class QueryUtils {
      * @param tableInfos 表注解信息
      * @return
      */
-    private static List<IFilter> splitFilterNameAlias(List<IFilter> filters, List<TableInfo> tableInfos) {
+    public static List<IFilter> splitFilterNameAlias(List<IFilter> filters, List<TableInfo> tableInfos) {
         if (filters == null || filters.size() == 0) {
             return filters;
         }
@@ -277,7 +277,7 @@ public class QueryUtils {
      * @param c
      * @return
      */
-    private static List<IOrderBy> splitOrderBys(List<IOrderBy> orderBys, Class c) {
+    public static List<IOrderBy> splitOrderBys(List<IOrderBy> orderBys, Class c) {
         if (orderBys == null || orderBys.size() == 0) {
             return orderBys;
         }
@@ -318,7 +318,7 @@ public class QueryUtils {
      * @param tableInfos 表间关系数据
      * @return
      */
-    private static List<IOrderBy> splitOrderBys(List<IOrderBy> orderBys, List<TableInfo> tableInfos) {
+    public static List<IOrderBy> splitOrderBys(List<IOrderBy> orderBys, List<TableInfo> tableInfos) {
         if (orderBys == null || orderBys.size() == 0) {
             return orderBys;
         }
@@ -362,7 +362,7 @@ public class QueryUtils {
      * @param c       业务类
      * @return
      */
-    private static List<String> splitColumns(List<String> columns, Class c) {
+    public static List<String> splitColumns(List<String> columns, Class c) {
         if (columns == null || columns.size() == 0) {
             throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "params error : columns is not null or empty");
         }
@@ -397,7 +397,7 @@ public class QueryUtils {
         return columns;
     }
 
-    private static List<String> addColumns(List<TableInfo> tableInfos) {
+    public static List<String> addColumns(List<TableInfo> tableInfos) {
 
         List<String> collect = tableInfos.parallelStream().map(TableInfo::getColumnName).collect(Collectors.toList());
         collect.removeAll(Arrays.asList(forbidColumns));
@@ -409,7 +409,7 @@ public class QueryUtils {
      * @param tableInfos 表间关系数据
      * @return
      */
-    private static List<String> splitColumns(List<String> columns, List<TableInfo> tableInfos) {
+    public static List<String> splitColumns(List<String> columns, List<TableInfo> tableInfos) {
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         if (tableInfos == null || tableInfos.size() == 0) {
             throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "params error : tableInfos is not null or empty");
@@ -459,7 +459,7 @@ public class QueryUtils {
      * @param c 查询的表间关系，以及表字段映射，别名
      * @return
      */
-    private static List<TableInfo> getTableInfo(Class c) {
+    public static List<TableInfo> getTableInfo(Class c) {
         if (c == null || Object.class.equals(c)) {
             throw new CommonException(ErrorCode.NOT_NULL, "params is not null");
         }
@@ -646,7 +646,7 @@ public class QueryUtils {
      * @param wrapper
      * @return
      */
-    private static String splitPageOracle(String sql, CommonWrapper wrapper) {
+    public static String splitPageOracle(String sql, CommonWrapper wrapper) {
         Long start = getStartCount(wrapper.getCurPage(), wrapper.getLimit());
         Long end = getEndCount(wrapper.getCurPage(), wrapper.getLimit(), DatabaseType.ORACLE);
         if (start != null && end != null && start < end) {
