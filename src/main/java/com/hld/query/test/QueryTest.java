@@ -1,5 +1,6 @@
 package com.hld.query.test;
 
+import com.hld.query.params.OrderType;
 import com.hld.query.test.vo.SysUserVO;
 import com.hld.query.params.IFilter;
 import com.hld.query.params.IOrderBy;
@@ -27,23 +28,36 @@ public class QueryTest {
 
         List<String> columns = new ArrayList<>(12);
         columns.add("id");
-        columns.add("username");
         columns.add("deptName");
-        columns.add("workNo");
 
         List<IFilter> filters = new ArrayList<>(12);
 
         options.setColumns(columns);
         options.setFilters(new ArrayList<IFilter>());
-        options.setOrderBys(new ArrayList<IOrderBy>());
         options.setCurPage(null);
         options.setLimit(null);
+
+        List<String> groups = new ArrayList<>(12);
+        groups.add("id");
+        groups.add("deptName");
+
+        List<IOrderBy> orders = new ArrayList<>(12);
+        IOrderBy orderBy = new IOrderBy();
+        orderBy.setOrderByName("id");
+        orderBy.setOrderByType(OrderType.ASC);
+        orders.add(orderBy);
+
+
+        options.setOrderBys(orders);
+        options.setGroupBys(groups);
 
         String s = commonQuery(options);
         System.out.println("test sql = " + s);
     }
 
     public static String commonQuery(QueryOptions params) {
+//        QueryUtils<SysUserVO> queryUtils = new QueryUtils<>();
+//        return queryUtils.testSql2(params, SysUserVO.class, null);
         return QueryUtils.testSql(params, SysUserVO.class, null);
     }
 }
