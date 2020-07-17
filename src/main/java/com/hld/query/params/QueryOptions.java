@@ -32,6 +32,12 @@ public class QueryOptions {
      * 排序集合
      */
     private List<IOrderBy> orderBys;
+
+    /**
+     * 分组集合
+     */
+    private List<String> groupBys;
+
     /**
      * 当前页
      */

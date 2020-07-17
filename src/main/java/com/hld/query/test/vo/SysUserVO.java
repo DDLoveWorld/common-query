@@ -55,12 +55,12 @@ public class SysUserVO {
     @TableFiledInfo()
     private Long deptId;
 
-    @TableFiledInfo(relation = "left join sys_dept A on A.id = T.dept_id", tableName = "sys_dept", tableAlias = "A", filedName = "name")
+    @TableFiledInfo(tableName = "sys_dept", tableAlias = "A", filedName = "name")
     private String deptName;
     /**
      * 员工工号
      */
-    @TableFiledInfo(relation = "left join sys_menu B on B.id = T.dept_id", tableName = "sys_menu", tableAlias = "B", filedName = "work_num")
+    @TableFiledInfo(tableName = "sys_menu", tableAlias = "B", filedName = "work_no")
     private String workNo;
     /**
      * 状态，1：正常，0：冻结状态，2：删除

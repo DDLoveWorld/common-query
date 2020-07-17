@@ -31,6 +31,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     private SharedString sqlSelect;
     private List<IFilter> filters = null;
     private List<String> columns;
+    private List<String> groupBys;
     private List<IOrderBy> orderBys;
     private Long curPage = null;
     private Long limit = null;
@@ -59,15 +60,18 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         if (options != null) {
             this.filters = options.getFilters();
             this.columns = options.getColumns();
+            this.groupBys = options.getGroupBys();
             this.orderBys = options.getOrderBys();
             this.curPage = options.getCurPage();
             this.limit = options.getLimit();
             this.firstSql = options.getFirstSql();
             splitColumns(this, columns);
             splitFilters(this, filters, false);
+            splitGroupBy(this, groupBys);
             splitOrderBy(this, orderBys);
         }
     }
+
 
     public CommonWrapper(QueryOptions options) {
         this.sqlSelect = new SharedString();
@@ -76,12 +80,14 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         if (options != null) {
             this.filters = options.getFilters();
             this.columns = options.getColumns();
+            this.groupBys = options.getGroupBys();
             this.orderBys = options.getOrderBys();
             this.curPage = options.getCurPage();
             this.limit = options.getLimit();
             this.firstSql = options.getFirstSql();
             splitColumns(this, columns);
             splitFilters(this, filters, false);
+            splitGroupBy(this, groupBys);
             splitOrderBy(this, orderBys);
         }
     }
@@ -102,6 +108,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             this.firstSql = options.getFirstSql();
             splitColumns(this, columns);
             splitFilters(this, filters, false);
+            splitGroupBy(this, groupBys);
             splitOrderBy(this, orderBys);
         }
     }
@@ -118,6 +125,10 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return orderBys;
     }
 
+    public List<String> getGroupBys() {
+        return groupBys;
+    }
+
     public Long getCurPage() {
         return curPage;
     }
@@ -132,6 +143,14 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
 
     public void setFirstSql(String firstSql) {
         this.firstSql = firstSql;
+    }
+
+    private void splitGroupBy(CommonWrapper<T> wrapper, List<String> groupBys) {
+        if (groupBys != null && groupBys.size() > 0) {
+            groupBys = SqlFilter.sqlInject(groupBys);
+            wrapper.groupBy(groupBys.toArray(new String[0]));
+        }
+
     }
 
     /**
@@ -301,7 +320,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         filterValues = SqlFilter.sqlInjectObject(filterValues);
         if (filter.getCondition() == ICondition.EQUAL) {
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, "=");
+                splitDateCondition(wrapper, filter, ICondition.EQUAL.getName());
             } else {
                 wrapper.eq(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -309,7 +328,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         } else if (filter.getCondition() == ICondition.UN_EQUAL) {
             //不等于
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, "!=");
+                splitDateCondition(wrapper, filter, ICondition.UN_EQUAL.getName());
             } else {
                 wrapper.ne(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -400,7 +419,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         } else if (filter.getCondition() == ICondition.GE) {
             //ge >=
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, ">=");
+                splitDateCondition(wrapper, filter, ICondition.GE.getName());
             } else {
                 wrapper.ge(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -408,7 +427,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         } else if (filter.getCondition() == ICondition.LE) {
             //le <=
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, "<=");
+                splitDateCondition(wrapper, filter, ICondition.LE.getName());
             } else {
                 wrapper.le(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -416,7 +435,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         } else if (filter.getCondition() == ICondition.GT) {
             //gt >
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, ">");
+                splitDateCondition(wrapper, filter, ICondition.GT.getName());
             } else {
                 wrapper.gt(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -424,7 +443,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         } else if (filter.getCondition() == ICondition.LT) {
             //lt <
             if (isDateCondition(filter)) {
-                splitDateCondition(wrapper, filter, "<");
+                splitDateCondition(wrapper, filter, ICondition.LT.getName());
             } else {
                 wrapper.lt(filterValues.get(0) != null, ReflexUtil.humpToUnderline(filterName),
                         filterValues.get(0) == null ? "" : splitSingleQuote(filterValues.get(0).toString()));
@@ -440,6 +459,9 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             }
             wrapper.isNull(ReflexUtil.humpToUnderline(filterName));
         } else if (filter.getCondition() == ICondition.BETWEEN) {
+            if (isDateCondition(filter)&&this.databaseType==DatabaseType.ORACLE) {
+                throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.BETWEEN + ") 不支持时间类型参数");
+            }
             if (filterValues.size() < 2) {
                 throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.BETWEEN + ") 需两个参数值");
             }
@@ -447,6 +469,9 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             Object end = filterValues.get(1);
             wrapper.between(ReflexUtil.humpToUnderline(filterName), start, end);
         } else if (filter.getCondition() == ICondition.NOT_BETWEEN) {
+            if (isDateCondition(filter)&&this.databaseType==DatabaseType.ORACLE) {
+                throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.NOT_BETWEEN + ") 不支持时间类型参数");
+            }
             if (filterValues.size() < 2) {
                 throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.NOT_BETWEEN + ") 需两个参数值");
             }
