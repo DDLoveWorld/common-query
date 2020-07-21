@@ -32,8 +32,18 @@ public class QueryTest {
 
         List<IFilter> filters = new ArrayList<>(12);
 
+        IFilter iFilter = new IFilter();
+        iFilter.setFilterName("deptName");
+        List<Object> l = new ArrayList<>();
+        l.add("sdids");
+        iFilter.setFilterValue(l);
+
+        filters.add(iFilter);
+
+
+
         options.setColumns(columns);
-        options.setFilters(new ArrayList<IFilter>());
+        options.setFilters(filters);
         options.setCurPage(null);
         options.setLimit(null);
 

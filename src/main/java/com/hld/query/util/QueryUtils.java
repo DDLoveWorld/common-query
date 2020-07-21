@@ -737,7 +737,7 @@ public class QueryUtils<T> {
             default:
                 break;
         }
-        return sqlParams.toUpperCase();
+        return sqlParams;
     }
 
     /**
