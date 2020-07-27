@@ -23,6 +23,6 @@
         <artifactId>common-query</artifactId>
         <version>1.2.1</version>
     </dependency>
-
-
+# 项目文档
+ CSDN项目文档地址：https://blog.csdn.net/My_Jack/article/details/106060592
 
