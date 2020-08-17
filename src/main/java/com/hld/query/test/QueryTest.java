@@ -33,19 +33,14 @@ public class QueryTest {
         List<IFilter> filters = new ArrayList<>(12);
 
         IFilter iFilter = new IFilter();
-        iFilter.setFilterName("deptName");
         List<Object> l = new ArrayList<>();
         l.add("sdids");
-        iFilter.setFilterValue(l);
+        iFilter.setFilterName("deptName").setFilterValue(l);
 
         filters.add(iFilter);
 
 
-
-        options.setColumns(columns);
-        options.setFilters(filters);
-        options.setCurPage(null);
-        options.setLimit(null);
+        options.setColumns(columns).setFilters(filters).setCurPage(null).setLimit(null);
 
         List<String> groups = new ArrayList<>(12);
         groups.add("id");
@@ -53,13 +48,11 @@ public class QueryTest {
 
         List<IOrderBy> orders = new ArrayList<>(12);
         IOrderBy orderBy = new IOrderBy();
-        orderBy.setOrderByName("id");
-        orderBy.setOrderByType(OrderType.ASC);
+        orderBy.setOrderByName("id").setOrderByType(OrderType.ASC);
         orders.add(orderBy);
 
 
-        options.setOrderBys(orders);
-        options.setGroupBys(groups);
+        options.setOrderBys(orders).setGroupBys(groups);
 
         String s = commonQuery(options);
         System.out.println("test sql = " + s);

@@ -1,6 +1,10 @@
 package com.hld.query.params;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -12,6 +16,10 @@ import java.util.List;
  * @date 2018年12月26日 下午4:51:27
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class IFilter {
 
     private String filterName;

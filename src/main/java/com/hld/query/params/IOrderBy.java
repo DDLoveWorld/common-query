@@ -1,8 +1,10 @@
 package com.hld.query.params;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * @author huald
@@ -14,6 +16,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Accessors(chain = true)
 public class IOrderBy {
 
     private String orderByName;
