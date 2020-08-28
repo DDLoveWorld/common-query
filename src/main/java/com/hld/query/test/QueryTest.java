@@ -20,7 +20,18 @@ import com.hld.query.util.QueryUtils;
 public class QueryTest {
 
     public static void main(String[] args) {
-        testSql();
+        test();
+    }
+
+    private static void test(){
+        QueryOptions options = new QueryOptions();
+        options.setFirstSql("asdasfdasf");
+        System.out.println(options.toString());
+        test1(options);
+    }
+
+    private static void test1(QueryOptions options){
+        System.out.println(options.toString());
     }
 
     private static void testSql() {

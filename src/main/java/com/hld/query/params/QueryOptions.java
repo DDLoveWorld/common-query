@@ -1,5 +1,6 @@
 package com.hld.query.params;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,7 +51,8 @@ public class QueryOptions {
     private Long limit;
 
     /**
-     * 最先拼接参数
+     * 最先拼接参数 对前端进行忽略，防止SQL注入风险
      */
+    @JsonIgnore
     private String firstSql;
 }
