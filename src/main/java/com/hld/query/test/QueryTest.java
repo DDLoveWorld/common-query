@@ -5,10 +5,7 @@ import com.hld.query.test.vo.SysUserVO;
 import com.hld.query.params.IFilter;
 import com.hld.query.params.IOrderBy;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.hld.query.params.QueryOptions;
 import com.hld.query.util.QueryUtils;
@@ -20,17 +17,34 @@ import com.hld.query.util.QueryUtils;
 public class QueryTest {
 
     public static void main(String[] args) {
-        test();
+        test2();
     }
 
-    private static void test(){
+    private static void test2() {
+        String[] s = new String[]{"1", "23"};
+        List<String> list = new ArrayList<>(12);
+
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        list.add("5");
+        list.add("6");
+        list.add("7");
+        list.add("8");
+
+        for (String str : list) {
+        }
+    }
+
+    private static void test() {
         QueryOptions options = new QueryOptions();
         options.setFirstSql("asdasfdasf");
         System.out.println(options.toString());
         test1(options);
     }
 
-    private static void test1(QueryOptions options){
+    private static void test1(QueryOptions options) {
         System.out.println(options.toString());
     }
 

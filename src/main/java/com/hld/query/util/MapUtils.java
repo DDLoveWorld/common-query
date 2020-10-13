@@ -1,7 +1,16 @@
 package com.hld.query.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hld.query.enums.SwitchType;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
+import com.hld.query.params.FormatSwitchInfo;
+import com.hld.query.params.SwitchData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -9,10 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Map 工具类
@@ -86,7 +92,7 @@ public class MapUtils {
      * @param clob 大文本
      * @return 结果
      * @throws SQLException SQL
-     * @throws IOException io
+     * @throws IOException  io
      */
     private static String clobtostring(Clob clob) throws SQLException, IOException {
         String ret = "";
@@ -103,5 +109,112 @@ public class MapUtils {
         read.close();
         return ret;
     }
+
+
+    /**
+     * 转换map中key为下划线为驼峰式
+     * ABC_DE => absDe , abc_de=>abcDe
+     *
+     * @param params 待转换
+     * @return 结果
+     */
+    public static List<Map<String, Object>> keysToCamelByList(List<Map<String, Object>> params, List<FormatSwitchInfo> infos) {
+        List<Map<String, Object>> list = keysToCamelByList(params);
+        if (infos != null && infos.size() > 0 && list.size() > 0) {
+            //有需要格式转换的数据
+            list.parallelStream().forEach(r -> {
+                infos.parallelStream().forEach(a -> {
+                    Object o = r.get(a.getFiledName());
+                    if (o == null) {
+                        return;
+                    }
+                    SwitchData switchData = switchFormat(a, o.toString());
+                    if (switchData != null) {
+                        r.put(switchData.getKey(), switchData.getValue());
+                    }
+
+                });
+
+            });
+        }
+        return list;
+    }
+
+
+    public static SwitchData switchFormat(FormatSwitchInfo info, String data) {
+        SwitchData switchData = null;
+        SwitchType type = info.getType();
+        String key = null;
+        Object value = null;
+        switch (type) {
+            case STR_TO_ARRAY:
+                key = info.getFiledName() + "Arr";
+                value = switchStrToArray(info.getSeparation(), data);
+                break;
+            case JSON_TO_OBJ:
+                key = info.getFiledName() + "Obj";
+                value = switchJsonToObj(data, info.getCls());
+                break;
+            case JSON_TO_LIST:
+                key = info.getFiledName() + "List";
+                value = switchJsonToList(data, info.getCls());
+                break;
+            case JSON_TO_ARRAY:
+                break;
+            default:
+                break;
+        }
+        if (key != null && value != null) {
+            switchData = new SwitchData();
+            switchData.setKey(key)
+                    .setValue(value);
+        }
+        return switchData;
+    }
+
+
+    private static List switchJsonToList(String data, Class<?> cls) {
+        if (StringUtils.isNotBlank(data)) {
+            ObjectMapper mapper = new ObjectMapper();
+            JavaType javaType = mapper.getTypeFactory().constructParametricType(List.class, cls);
+            try {
+                List list = mapper.readValue(data, javaType);
+                return list;
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+        return null;
+    }
+
+    private static Object switchJsonToObj(String data, Class<?> cls) {
+        if (StringUtils.isNotBlank(data)) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.readValue(data, cls);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 字符串转数组 通过分隔符
+     *
+     * @param separation
+     * @param data
+     * @return
+     */
+    private static String[] switchStrToArray(String separation, String data) {
+
+        if (StringUtils.isNotBlank(data)) {
+            return data.split(separation);
+        }
+        return null;
+    }
+
 
 }

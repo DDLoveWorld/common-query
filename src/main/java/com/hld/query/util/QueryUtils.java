@@ -1,5 +1,6 @@
 package com.hld.query.util;
 
+import com.hld.query.annotations.FormatSwitch;
 import com.hld.query.annotations.TableFiledInfo;
 import com.hld.query.annotations.TableRelations;
 import com.hld.query.enums.DatabaseType;
@@ -642,6 +643,69 @@ public class QueryUtils<T> {
     }
 
     /**
+     * 获取待转换数据格式字段
+     *
+     * @param c
+     * @return
+     */
+    public static List<FormatSwitchInfo> getSwitchColumns(Class c) {
+        if (c == null || Object.class.equals(c)) {
+            throw new CommonException(ErrorCode.NOT_NULL, "params is not null");
+        }
+        List<Field> allFields = new ArrayList<>(12);
+        //添加字段
+        Field[] fields = c.getDeclaredFields();
+        if (fields.length != 0) {
+            Collections.addAll(allFields, fields);
+        } else {
+            return null;
+        }
+        List<FormatSwitchInfo> infos = new ArrayList<>(12);
+        for (Field field : allFields) {
+            field.setAccessible(true);
+            //得到成员变量的类型的类类型
+            Class fieldType = field.getType();
+            String typeName = fieldType.getName();
+            //得到成员变量的名称
+            String fieldName = field.getName();
+            Annotation[] annotations = field.getDeclaredAnnotations();
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof FormatSwitch) {
+                    FormatSwitchInfo info = FormatSwitchInfo
+                            .builder()
+                            .filedName(fieldName)
+                            .separation(((FormatSwitch) annotation).separation())
+                            .type(((FormatSwitch) annotation).type())
+                            .cls(((FormatSwitch) annotation).cls()).build();
+                    infos.add(info);
+                }
+            }
+        }
+
+        return infos;
+    }
+
+    /**
+     * 检查前端前端需要的字段中是否有需要进行转换的字段
+     *
+     * @param infos   所有需要转换数据格式的字段
+     * @param columns 前端需要展示的字段
+     * @return
+     */
+    public static List<FormatSwitchInfo> checkSwitchColumn(List<FormatSwitchInfo> infos, List<String> columns) {
+        if (null == infos || null == columns || infos.size() == 0 || columns.size() == 0) {
+            return null;
+        }
+        List<FormatSwitchInfo> result = new ArrayList<>(12);
+        for (FormatSwitchInfo info : infos) {
+            if (columns.parallelStream().anyMatch(r -> r.equals(info.getFiledName()))) {
+                result.add(info);
+            }
+        }
+        return result;
+    }
+
+    /**
      * 获取分页start条数
      *
      * @param curPage
@@ -769,13 +833,18 @@ public class QueryUtils<T> {
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
+        if (null == columns || columns.size() == 0) {
+            columns = addColumns(tableInfos);
+        }
         CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
         List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
-        return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map), total, wrapper.getCurPage()));
+
+        return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map, checkSwitchColumn(getSwitchColumns(c), columns)), total, wrapper.getCurPage()));
     }
+
 
     /**
      * 获取查询返回分页结果集（map）
@@ -883,7 +952,7 @@ public class QueryUtils<T> {
         return getCompletedSQL(relation, whereSql, type, wrapper);
     }
 
-    public  String testSql2(QueryOptions params, Class c, DatabaseType type) {
+    public String testSql2(QueryOptions params, Class c, DatabaseType type) {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
