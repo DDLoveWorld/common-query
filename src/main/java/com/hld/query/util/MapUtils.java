@@ -1,5 +1,6 @@
 package com.hld.query.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -113,6 +114,7 @@ public class MapUtils {
 
     /**
      * 转换map中key为下划线为驼峰式
+     * 并更改需要转换格式的数据
      * ABC_DE => absDe , abc_de=>abcDe
      *
      * @param params 待转换
@@ -129,10 +131,7 @@ public class MapUtils {
                         return;
                     }
                     SwitchData switchData = switchFormat(a, o.toString());
-                    if (switchData != null) {
-                        r.put(switchData.getKey(), switchData.getValue());
-                    }
-
+                    r.put(switchData.getKey(), switchData.getValue());
                 });
 
             });
@@ -140,9 +139,14 @@ public class MapUtils {
         return list;
     }
 
-
+    /**
+     * 转换返回数据格式
+     *
+     * @param info 需要转换数据格式的字段信息
+     * @param data 需要转换的数据
+     * @return
+     */
     public static SwitchData switchFormat(FormatSwitchInfo info, String data) {
-        SwitchData switchData = null;
         SwitchType type = info.getType();
         String key = null;
         Object value = null;
@@ -160,19 +164,24 @@ public class MapUtils {
                 value = switchJsonToList(data, info.getCls());
                 break;
             case JSON_TO_ARRAY:
+                key = info.getFiledName() + "Arr";
+                value = switchJsonToArray(data);
                 break;
             default:
                 break;
         }
-        if (key != null && value != null) {
-            switchData = new SwitchData();
-            switchData.setKey(key)
-                    .setValue(value);
-        }
-        return switchData;
+
+        return new SwitchData().setKey(key)
+                .setValue(value);
     }
 
-
+    /**
+     * json 转 list
+     *
+     * @param data 待转换json数据
+     * @param cls  转换成类型
+     * @return
+     */
     private static List switchJsonToList(String data, Class<?> cls) {
         if (StringUtils.isNotBlank(data)) {
             ObjectMapper mapper = new ObjectMapper();
@@ -188,6 +197,13 @@ public class MapUtils {
         return null;
     }
 
+    /**
+     * Json 转 对象
+     *
+     * @param data 待转换json数据
+     * @param cls  转换成类型
+     * @return
+     */
     private static Object switchJsonToObj(String data, Class<?> cls) {
         if (StringUtils.isNotBlank(data)) {
             ObjectMapper mapper = new ObjectMapper();
@@ -204,8 +220,8 @@ public class MapUtils {
     /**
      * 字符串转数组 通过分隔符
      *
-     * @param separation
-     * @param data
+     * @param separation 分隔符
+     * @param data       需转换数据
      * @return
      */
     private static String[] switchStrToArray(String separation, String data) {
@@ -216,5 +232,21 @@ public class MapUtils {
         return null;
     }
 
+    /**
+     * 字符串数组  转 数组对象
+     *
+     * @param data 需转换数据
+     * @return
+     */
+    private static Object switchJsonToArray(String data) {
+        if (StringUtils.isNotBlank(data)) {
+            try {
+                return JSONArray.parse(data);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
 
 }
