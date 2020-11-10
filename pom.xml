@@ -12,7 +12,7 @@
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.1</version>
+    <version>1.3.2</version>
     <description>Common query demo project for Spring Boot</description>
 
     <properties>
