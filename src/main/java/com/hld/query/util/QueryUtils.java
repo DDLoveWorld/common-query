@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QueryUtils<T> {
 
-    public static String[] forbidColumns = new String[]{"creator", "createTime", "updater", "updateTime", "tenantId"};
+    public static String[] forbidColumns = new String[]{"tenantId"};
 
     public static String splitSql(CommonWrapper wrapper) {
         String sql = "";
