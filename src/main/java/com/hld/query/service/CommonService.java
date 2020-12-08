@@ -51,4 +51,12 @@ public interface CommonService<T> extends IService<T> {
      */
     List<T> commonQueryReturnEntity(String columns, String conditions, String relation);
 
+    /**
+     *
+     * @param columns    需要返回的字段
+     * @param conditions 需要拼接的where条件 以及分页SQL
+     * @param relation   表间关系
+     * @return 返回实体结果集
+     */
+    List<Object> commonQueryReturnObject(String columns, String conditions, String relation);
 }

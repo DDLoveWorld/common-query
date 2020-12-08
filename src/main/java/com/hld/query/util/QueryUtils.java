@@ -8,6 +8,7 @@ import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
 import com.hld.query.mapper.CommonMapper;
 import com.hld.query.params.*;
+import com.hld.query.service.CommonService;
 import com.hld.query.wrapper.CommonWrapper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -817,6 +818,18 @@ public class QueryUtils<T> {
     }
 
     /**
+     * 获取查询结果集并封装返回数据格式
+     *
+     * @param commonService
+     * @param params
+     * @param c
+     * @return
+     */
+    public static Result getResult(CommonService commonService, QueryOptions params, Class c) {
+        return getResult(commonService, params, c, DatabaseType.MYSQL);
+    }
+
+    /**
      * 获取查询返回结果集（map）
      *
      * @param baseMapper 当前业务mapper
@@ -841,6 +854,35 @@ public class QueryUtils<T> {
         String whereSql = splitSql(wrapper);
         Long total = baseMapper.commonQueryCount(whereSql, relation);
         List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
+
+        return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map, checkSwitchColumn(getSwitchColumns(c), columns)), total, wrapper.getCurPage()));
+    }
+
+    /**
+     * 获取查询返回结果集（map）
+     *
+     * @param commonService 当前业务service
+     * @param params        查询参数
+     * @param c             当前业务VO类
+     * @param type          当前数据库类型（默认为Mysql）
+     * @return
+     */
+    public static Result getResult(CommonService commonService, QueryOptions params, Class c, DatabaseType type) {
+        if (type == null) {
+            type = DatabaseType.MYSQL;
+        }
+        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
+        List<String> columns = params.getColumns();
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        if (null == columns || columns.size() == 0) {
+            columns = addColumns(tableInfos);
+        }
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
+        String relation = getRelation(getRelation(c), columns, tableInfos);
+        String whereSql = splitSql(wrapper);
+        Long total = commonService.commonQueryCount(whereSql, relation);
+        List<Map<String, Object>> map = commonService.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
 
         return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map, checkSwitchColumn(getSwitchColumns(c), columns)), total, wrapper.getCurPage()));
     }
@@ -872,6 +914,31 @@ public class QueryUtils<T> {
     }
 
     /**
+     * 获取查询返回分页结果集（map）
+     *
+     * @param commonService 当前业务service
+     * @param params        查询参数
+     * @param c             当前业务VO类
+     * @param type          当前数据库类型（默认为Mysql）
+     * @return 返回结果分页结果集
+     */
+    public static PageData getPageResult(CommonService commonService, QueryOptions params, Class c, DatabaseType type) {
+        if (type == null) {
+            type = DatabaseType.MYSQL;
+        }
+        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
+        List<String> columns = params.getColumns();
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
+        String relation = getRelation(getRelation(c), columns, tableInfos);
+        String whereSql = splitSql(wrapper);
+        Long total = commonService.commonQueryCount(whereSql, relation);
+        List<Map<String, Object>> map = commonService.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
+        return new PageData<>(MapUtils.keysToCamelByList(map), total, wrapper.getCurPage());
+    }
+
+    /**
      * 获取查询结果集（map）
      *
      * @param baseMapper 当前业务mapper
@@ -895,6 +962,30 @@ public class QueryUtils<T> {
         return MapUtils.keysToCamelByList(map);
     }
 
+    /**
+     * 获取查询结果集（map）
+     *
+     * @param commonService 当前业务service
+     * @param params        查询参数
+     * @param c             当前业务VO类
+     * @param type          当前数据库类型（默认为Mysql）
+     * @return 返回结果集
+     */
+    public static List<Map<String, Object>> getListResult(CommonService commonService, QueryOptions params, Class c, DatabaseType type) {
+        if (type == null) {
+            type = DatabaseType.MYSQL;
+        }
+        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
+        List<String> columns = params.getColumns();
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
+        String relation = getRelation(getRelation(c), columns, tableInfos);
+        String whereSql = splitSql(wrapper);
+        List<Map<String, Object>> map = commonService.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
+        return MapUtils.keysToCamelByList(map);
+    }
+
 
     public static Result getObjectResult(CommonMapper baseMapper, QueryOptions params, Class c, DatabaseType type) {
         if (type == null) {
@@ -907,6 +998,20 @@ public class QueryUtils<T> {
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
         List<Object> list = baseMapper.commonQueryReturnObject(wrapper.getSqlSelect(), whereSql, relation);
+        return new Result().success(list);
+    }
+
+    public static Result getObjectResult(CommonService commonService, QueryOptions params, Class c, DatabaseType type) {
+        if (type == null) {
+            type = DatabaseType.MYSQL;
+        }
+        List<String> columns = params.getColumns();
+        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
+        List<TableInfo> tableInfos = getTableInfo(c);
+        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
+        String relation = getRelation(getRelation(c), columns, tableInfos);
+        String whereSql = splitSql(wrapper);
+        List<Object> list = commonService.commonQueryReturnObject(wrapper.getSqlSelect(), whereSql, relation);
         return new Result().success(list);
     }
 
@@ -938,32 +1043,18 @@ public class QueryUtils<T> {
         return list;
     }
 
-    public static String testSql(QueryOptions params, Class c, DatabaseType type) {
+    public List<T> getEntityList(CommonService commonService, QueryOptions params, Class c, DatabaseType type) {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        List<String> columns = new ArrayList<>(12);
-        columns.addAll(params.getColumns());
+        List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
+        CommonWrapper<T> wrapper = new CommonWrapper(splitOptions(params, tableInfos), type);
         String relation = getRelation(getRelation(c), columns, tableInfos);
         String whereSql = splitSql(wrapper);
-        return getCompletedSQL(relation, whereSql, type, wrapper);
-    }
-
-    public String testSql2(QueryOptions params, Class c, DatabaseType type) {
-        if (type == null) {
-            type = DatabaseType.MYSQL;
-        }
-        List<String> columns = new ArrayList<>(12);
-        columns.addAll(params.getColumns());
-        //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
-        List<TableInfo> tableInfos = getTableInfo(c);
-        CommonWrapper wrapper = new CommonWrapper(splitOptions(params, tableInfos));
-        String relation = getRelation(getRelation(c), columns, tableInfos);
-        String whereSql = splitSql(wrapper);
-        return getCompletedSQL(relation, whereSql, type, wrapper);
+        List<T> list = commonService.commonQueryReturnEntity(wrapper.getSqlSelect(), whereSql, relation);
+        return list;
     }
 
 }
