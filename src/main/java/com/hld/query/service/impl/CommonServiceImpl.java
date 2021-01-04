@@ -73,7 +73,7 @@ public class CommonServiceImpl<M extends CommonMapper<T>, T> extends ServiceImpl
      * @return 返回实体结果集
      */
     @Transactional(rollbackFor = {Exception.class})
-    List<Object> commonQueryReturnObject(String columns, String conditions, String relation) {
+    public List<Object> commonQueryReturnObject(String columns, String conditions, String relation) {
         return baseMapper.commonQueryReturnObject(columns, conditions, relation);
     }
 }

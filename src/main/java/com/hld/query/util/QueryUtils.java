@@ -1,11 +1,13 @@
 package com.hld.query.util;
 
 import com.hld.query.annotations.FormatSwitch;
+import com.hld.query.annotations.Sensitive;
 import com.hld.query.annotations.TableFiledInfo;
 import com.hld.query.annotations.TableRelations;
 import com.hld.query.enums.DatabaseType;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
+import com.hld.query.interfaces.IAnnotationType;
 import com.hld.query.mapper.CommonMapper;
 import com.hld.query.params.*;
 import com.hld.query.service.CommonService;
@@ -649,6 +651,7 @@ public class QueryUtils<T> {
      * @param c
      * @return
      */
+    @Deprecated
     public static List<FormatSwitchInfo> getSwitchColumns(Class c) {
         if (c == null || Object.class.equals(c)) {
             throw new CommonException(ErrorCode.NOT_NULL, "params is not null");
@@ -674,10 +677,62 @@ public class QueryUtils<T> {
                 if (annotation instanceof FormatSwitch) {
                     FormatSwitchInfo info = FormatSwitchInfo
                             .builder()
-                            .filedName(fieldName)
+//                            .fieldName(fieldName)
                             .separation(((FormatSwitch) annotation).separation())
                             .type(((FormatSwitch) annotation).type())
                             .cls(((FormatSwitch) annotation).cls()).build();
+                    info.setFieldName(fieldName);
+                    infos.add(info);
+                }
+            }
+        }
+
+        return infos;
+    }
+
+
+    /**
+     * 获取所有拥有自定义注解的字段
+     *
+     * @param c
+     * @return
+     */
+    public static List<AbstractInfo> getAnnotationColumns(Class c) {
+        if (c == null || Object.class.equals(c)) {
+            throw new CommonException(ErrorCode.NOT_NULL, "params is not null");
+        }
+        List<Field> allFields = new ArrayList<>(12);
+        //添加字段
+        Field[] fields = c.getDeclaredFields();
+        if (fields.length != 0) {
+            Collections.addAll(allFields, fields);
+        } else {
+            return null;
+        }
+        List<AbstractInfo> infos = new ArrayList<>(12);
+        for (Field field : allFields) {
+            field.setAccessible(true);
+            //得到成员变量的类型的类类型
+            Class fieldType = field.getType();
+            String typeName = fieldType.getName();
+            //得到成员变量的名称
+            String fieldName = field.getName();
+            Annotation[] annotations = field.getDeclaredAnnotations();
+            for (Annotation annotation : annotations) {
+                if (annotation instanceof FormatSwitch) {
+                    FormatSwitchInfo info = FormatSwitchInfo
+                            .builder()
+//                            .filedName(fieldName)
+                            .separation(((FormatSwitch) annotation).separation())
+                            .type(((FormatSwitch) annotation).type())
+                            .cls(((FormatSwitch) annotation).cls()).build();
+                    info.setFieldName(fieldName);
+                    infos.add(info);
+                }
+                if (annotation instanceof Sensitive) {
+                    SensitiveInfo info = SensitiveInfo.builder()
+                            .sensitiveStrategy(((Sensitive) annotation).strategy()).build();
+                    info.setFieldName(fieldName);
                     infos.add(info);
                 }
             }
@@ -693,13 +748,34 @@ public class QueryUtils<T> {
      * @param columns 前端需要展示的字段
      * @return
      */
+    @Deprecated
     public static List<FormatSwitchInfo> checkSwitchColumn(List<FormatSwitchInfo> infos, List<String> columns) {
         if (null == infos || null == columns || infos.size() == 0 || columns.size() == 0) {
             return null;
         }
         List<FormatSwitchInfo> result = new ArrayList<>(12);
         for (FormatSwitchInfo info : infos) {
-            if (columns.parallelStream().anyMatch(r -> r.equals(info.getFiledName()))) {
+            if (columns.parallelStream().anyMatch(r -> r.equals(info.getFieldName()))) {
+                result.add(info);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 检查前端需要的字段中是否有包含自定义注解
+     *
+     * @param infos
+     * @param columns
+     * @return
+     */
+    public static List<AbstractInfo> checkAnnotationColumn(List<AbstractInfo> infos, List<String> columns) {
+        if (null == infos || null == columns || infos.size() == 0 || columns.size() == 0) {
+            return null;
+        }
+        List<AbstractInfo> result = new ArrayList<>(12);
+        for (AbstractInfo info : infos) {
+            if (columns.parallelStream().anyMatch(r -> r.equals(info.getFieldName()))) {
                 result.add(info);
             }
         }
@@ -842,7 +918,6 @@ public class QueryUtils<T> {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
@@ -855,7 +930,7 @@ public class QueryUtils<T> {
         Long total = baseMapper.commonQueryCount(whereSql, relation);
         List<Map<String, Object>> map = baseMapper.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
 
-        return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map, checkSwitchColumn(getSwitchColumns(c), columns)), total, wrapper.getCurPage()));
+        return new Result().success(new PageData<>(MapUtils.dataHandling(map, checkAnnotationColumn(getAnnotationColumns(c), columns)), total, wrapper.getCurPage()));
     }
 
     /**
@@ -871,7 +946,6 @@ public class QueryUtils<T> {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
@@ -884,7 +958,7 @@ public class QueryUtils<T> {
         Long total = commonService.commonQueryCount(whereSql, relation);
         List<Map<String, Object>> map = commonService.commonQueryByParams(getCompletedSQL(relation, whereSql, type, wrapper));
 
-        return new Result().success(new PageData<>(MapUtils.keysToCamelByList(map, checkSwitchColumn(getSwitchColumns(c), columns)), total, wrapper.getCurPage()));
+        return new Result().success(new PageData<>(MapUtils.dataHandling(map, checkAnnotationColumn(getAnnotationColumns(c), columns)), total, wrapper.getCurPage()));
     }
 
 
@@ -901,7 +975,6 @@ public class QueryUtils<T> {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);
@@ -951,7 +1024,6 @@ public class QueryUtils<T> {
         if (type == null) {
             type = DatabaseType.MYSQL;
         }
-        log.info("SysUser common query News Params ：[{}] , database type [{}]", params.toString(), type);
         List<String> columns = params.getColumns();
         //利用反射原理读出当前查询的表间关系，以及表字段映射，别名
         List<TableInfo> tableInfos = getTableInfo(c);

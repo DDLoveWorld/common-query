@@ -4,14 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hld.query.enums.SensitiveStrategy;
 import com.hld.query.enums.SwitchType;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
+import com.hld.query.params.AbstractInfo;
 import com.hld.query.params.FormatSwitchInfo;
+import com.hld.query.params.SensitiveInfo;
 import com.hld.query.params.SwitchData;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Map 工具类
@@ -116,22 +119,69 @@ public class MapUtils {
      * 转换map中key为下划线为驼峰式
      * 并更改需要转换格式的数据
      * ABC_DE => absDe , abc_de=>abcDe
+     * 推荐使用dataHandling方法
      *
      * @param params 待转换
      * @return 结果
      */
+    @Deprecated
     public static List<Map<String, Object>> keysToCamelByList(List<Map<String, Object>> params, List<FormatSwitchInfo> infos) {
         List<Map<String, Object>> list = keysToCamelByList(params);
         if (infos != null && infos.size() > 0 && list.size() > 0) {
             //有需要格式转换的数据
             list.parallelStream().forEach(r -> {
                 infos.parallelStream().forEach(a -> {
-                    Object o = r.get(a.getFiledName());
+                    Object o = r.get(a.getFieldName());
                     if (o == null) {
                         return;
                     }
                     SwitchData switchData = switchFormat(a, o.toString());
                     r.put(switchData.getKey(), switchData.getValue());
+                });
+
+            });
+        }
+        return list;
+    }
+
+    /**
+     * 转换map中key为下划线为驼峰式
+     * <p>
+     * ABC_DE => absDe , abc_de=>abcDe
+     *
+     * @param params 待处理数据
+     * @param infos  待处理字段数据
+     * @return 结果
+     */
+    public static List<Map<String, Object>> dataHandling(List<Map<String, Object>> params, List<AbstractInfo> infos) {
+        List<Map<String, Object>> list = keysToCamelByList(params);
+        if (infos != null && infos.size() > 0 && list.size() > 0) {
+            //有需要格式转换的数据
+            list.parallelStream().forEach(r -> {
+                infos.parallelStream().forEach(a -> {
+                    Object o = r.get(a.getFieldName());
+                    if (o == null) {
+                        return;
+                    }
+                    switch (a.getAnnotationType()) {
+                        case SENSITIVE:
+                            SensitiveInfo sensitiveInfo = (SensitiveInfo) a;
+                            SensitiveStrategy sensitiveStrategy = sensitiveInfo.getSensitiveStrategy();
+                            try {
+                                String result = sensitiveStrategy.getDesensitizer().apply(o.toString());
+                                r.put(a.getFieldName(), result);
+                            } catch (Exception e) {
+
+                            }
+                            break;
+                        case SWITCH_FORMAT:
+                            SwitchData switchData = switchFormat((FormatSwitchInfo) a, o.toString());
+                            r.put(switchData.getKey(), switchData.getValue());
+                            break;
+                        default:
+                            break;
+                    }
+
                 });
 
             });
@@ -152,19 +202,19 @@ public class MapUtils {
         Object value = null;
         switch (type) {
             case STR_TO_ARRAY:
-                key = info.getFiledName() + "Arr";
+                key = info.getFieldName() + "Arr";
                 value = switchStrToArray(info.getSeparation(), data);
                 break;
             case JSON_TO_OBJ:
-                key = info.getFiledName() + "Obj";
+                key = info.getFieldName() + "Obj";
                 value = switchJsonToObj(data, info.getCls());
                 break;
             case JSON_TO_LIST:
-                key = info.getFiledName() + "List";
+                key = info.getFieldName() + "List";
                 value = switchJsonToList(data, info.getCls());
                 break;
             case JSON_TO_ARRAY:
-                key = info.getFiledName() + "Arr";
+                key = info.getFieldName() + "Arr";
                 value = switchJsonToArray(data);
                 break;
             default:
