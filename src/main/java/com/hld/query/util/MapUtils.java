@@ -19,10 +19,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Map 工具类
@@ -160,22 +157,21 @@ public class MapUtils {
             list.parallelStream().forEach(r -> {
                 infos.parallelStream().forEach(a -> {
                     Object o = r.get(a.getFieldName());
-                    if (o == null) {
-                        return;
-                    }
                     switch (a.getAnnotationType()) {
                         case SENSITIVE:
                             SensitiveInfo sensitiveInfo = (SensitiveInfo) a;
                             SensitiveStrategy sensitiveStrategy = sensitiveInfo.getSensitiveStrategy();
                             try {
-                                String result = sensitiveStrategy.getDesensitizer().apply(o.toString());
-                                r.put(a.getFieldName(), result);
+                                if (StringUtils.isNotBlank(o.toString())) {
+                                    String result = sensitiveStrategy.getDesensitizer().apply(o.toString());
+                                    r.put(a.getFieldName(), result);
+                                }
                             } catch (Exception e) {
 
                             }
                             break;
                         case SWITCH_FORMAT:
-                            SwitchData switchData = switchFormat((FormatSwitchInfo) a, o.toString());
+                            SwitchData switchData = switchFormat((FormatSwitchInfo) a, o == null ? null : o.toString());
                             r.put(switchData.getKey(), switchData.getValue());
                             break;
                         default:
@@ -198,12 +194,13 @@ public class MapUtils {
      */
     public static SwitchData switchFormat(FormatSwitchInfo info, String data) {
         SwitchType type = info.getType();
+        Boolean handleEmptyAndNull = info.getHandleEmptyAndNull();
         String key = null;
         Object value = null;
         switch (type) {
             case STR_TO_ARRAY:
                 key = info.getFieldName() + "Arr";
-                value = switchStrToArray(info.getSeparation(), data);
+                value = switchStrToArray(info.getSeparation(), data, handleEmptyAndNull);
                 break;
             case JSON_TO_OBJ:
                 key = info.getFieldName() + "Obj";
@@ -211,11 +208,11 @@ public class MapUtils {
                 break;
             case JSON_TO_LIST:
                 key = info.getFieldName() + "List";
-                value = switchJsonToList(data, info.getCls());
+                value = switchJsonToList(data, info.getCls(), handleEmptyAndNull);
                 break;
             case JSON_TO_ARRAY:
                 key = info.getFieldName() + "Arr";
-                value = switchJsonToArray(data);
+                value = switchJsonToArray(data, handleEmptyAndNull);
                 break;
             default:
                 break;
@@ -228,11 +225,12 @@ public class MapUtils {
     /**
      * json 转 list
      *
-     * @param data 待转换json数据
-     * @param cls  转换成类型
+     * @param data               待转换json数据
+     * @param cls                转换成类型
+     * @param handleEmptyAndNull
      * @return
      */
-    private static List switchJsonToList(String data, Class<?> cls) {
+    private static List switchJsonToList(String data, Class<?> cls, Boolean handleEmptyAndNull) {
         if (StringUtils.isNotBlank(data)) {
             ObjectMapper mapper = new ObjectMapper();
             JavaType javaType = mapper.getTypeFactory().constructParametricType(List.class, cls);
@@ -242,7 +240,9 @@ public class MapUtils {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            return null;
+        }
+        if (handleEmptyAndNull) {
+            return Collections.EMPTY_LIST;
         }
         return null;
     }
@@ -270,14 +270,18 @@ public class MapUtils {
     /**
      * 字符串转数组 通过分隔符
      *
-     * @param separation 分隔符
-     * @param data       需转换数据
+     * @param separation         分隔符
+     * @param data               需转换数据
+     * @param handleEmptyAndNull
      * @return
      */
-    private static String[] switchStrToArray(String separation, String data) {
+    private static Object switchStrToArray(String separation, String data, Boolean handleEmptyAndNull) {
 
         if (StringUtils.isNotBlank(data)) {
             return data.split(separation);
+        }
+        if (handleEmptyAndNull) {
+            return Collections.EMPTY_LIST;
         }
         return null;
     }
@@ -285,16 +289,23 @@ public class MapUtils {
     /**
      * 字符串数组  转 数组对象
      *
-     * @param data 需转换数据
+     * @param data               需转换数据
+     * @param handleEmptyAndNull
      * @return
      */
-    private static Object switchJsonToArray(String data) {
+    private static Object switchJsonToArray(String data, Boolean handleEmptyAndNull) {
         if (StringUtils.isNotBlank(data)) {
             try {
                 return JSONArray.parse(data);
             } catch (Exception e) {
+                if (handleEmptyAndNull) {
+                    return Collections.EMPTY_LIST;
+                }
                 return null;
             }
+        }
+        if (handleEmptyAndNull) {
+            return Collections.EMPTY_LIST;
         }
         return null;
     }

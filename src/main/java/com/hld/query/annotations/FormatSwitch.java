@@ -38,4 +38,11 @@ public @interface FormatSwitch {
      * 当 type = JSON_TO_OBJ,JSON_TO_LIST 生效
      */
     Class<?> cls() default Object.class;
+
+    /**
+     * 当需要处理的值是null或者""时，是否进行处理为[]
+     *
+     * @return
+     */
+    boolean handleEmptyAndNull() default true;
 }

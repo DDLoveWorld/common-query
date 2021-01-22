@@ -31,6 +31,8 @@ public class FormatSwitchInfo extends AbstractInfo {
 
     private Class<?> cls;
 
+    private Boolean handleEmptyAndNull;
+
 
     @Override
     public AnnotationType getAnnotationType() {

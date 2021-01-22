@@ -725,15 +725,18 @@ public class QueryUtils<T> {
 //                            .filedName(fieldName)
                             .separation(((FormatSwitch) annotation).separation())
                             .type(((FormatSwitch) annotation).type())
+                            .handleEmptyAndNull(((FormatSwitch) annotation).handleEmptyAndNull())
                             .cls(((FormatSwitch) annotation).cls()).build();
                     info.setFieldName(fieldName);
                     infos.add(info);
+                    continue;
                 }
                 if (annotation instanceof Sensitive) {
                     SensitiveInfo info = SensitiveInfo.builder()
                             .sensitiveStrategy(((Sensitive) annotation).strategy()).build();
                     info.setFieldName(fieldName);
                     infos.add(info);
+                    continue;
                 }
             }
         }
