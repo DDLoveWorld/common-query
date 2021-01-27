@@ -57,7 +57,7 @@ public class MapUtils {
                     map.put(key, mapValue);
                 }
             } else {
-                map.put(key, "");
+                map.put(key, mapValue);
             }
         }
         return map;
