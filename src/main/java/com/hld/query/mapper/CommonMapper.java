@@ -1,6 +1,5 @@
 package com.hld.query.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -11,12 +10,12 @@ import java.util.Map;
  * 扩展性强查询方法
  *
  * @author huald
- * @version 1.0.0
+ * @version 2.0.0
  * @email 869701411@qq.com
  * @description: 扩展性强查询方法
  * @date 2019/8/26
  */
-public interface CommonMapper<T> extends BaseMapper<T> {
+public interface CommonMapper<T> {
     /**
      * 多表通用查询
      *

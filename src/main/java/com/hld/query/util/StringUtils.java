@@ -1,6 +1,7 @@
 package com.hld.query.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -321,7 +322,6 @@ public class StringUtils {
     }
 
     /**
-     *
      * @param arr
      * @return
      */
@@ -329,13 +329,53 @@ public class StringUtils {
         StringBuilder stringBuilder = new StringBuilder();
         int size = arr.length;
         for (int i = 0; i < size; i++) {
-            if (i<size-1){
+            if (i < size - 1) {
                 stringBuilder.append(arr[i]);
                 stringBuilder.append(",");
-            }else{
+            } else {
                 stringBuilder.append(arr[i]);
             }
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * 数组转字符串并通过某个字符拼接
+     *
+     * @param array     带转换数组
+     * @param separator 分隔符字符串
+     * @return
+     */
+    public static String join(Object[] array, String separator) {
+        if (array == null || array.length == 0) return null;
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null && isNotBlank(array[i].toString())) {
+                builder.append(array[i]);
+                if (i != array.length - 1) {
+                    builder.append(separator);
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String sqlJoin(Object[] array, String separator) {
+        if (array == null || array.length == 0) return null;
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null && isNotBlank(array[i].toString())) {
+                builder.append("'").append(array[i]).append("'");
+                if (i != array.length - 1) {
+                    builder.append(separator);
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    public static String sqlJoin(Collection<?> values, String separator) {
+        if (values == null || values.size() == 0) return null;
+        return sqlJoin(values.toArray(), separator);
     }
 }

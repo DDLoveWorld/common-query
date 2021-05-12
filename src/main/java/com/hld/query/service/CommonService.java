@@ -1,7 +1,5 @@
 package com.hld.query.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +11,7 @@ import java.util.Map;
  * @email 869701411@qq.com
  * @date 2019/8/26
  */
-public interface CommonService<T> extends IService<T> {
+public interface CommonService<T> {
     /**
      * 多表通用查询
      *
@@ -52,7 +50,6 @@ public interface CommonService<T> extends IService<T> {
     List<T> commonQueryReturnEntity(String columns, String conditions, String relation);
 
     /**
-     *
      * @param columns    需要返回的字段
      * @param conditions 需要拼接的where条件 以及分页SQL
      * @param relation   表间关系

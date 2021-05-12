@@ -1,34 +1,20 @@
 package com.hld.query.wrapper;
 
-import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
-import com.baomidou.mybatisplus.core.conditions.SharedString;
-import com.baomidou.mybatisplus.core.conditions.query.Query;
-import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
-import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
-import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.hld.query.enums.DatabaseType;
 import com.hld.query.exception.CommonException;
 import com.hld.query.exception.ErrorCode;
+import com.hld.query.params.IOrderBy;
 import com.hld.query.params.*;
-import com.hld.query.util.*;
+import com.hld.query.util.ReflexUtil;
+import com.hld.query.util.SqlFilter;
+import com.hld.query.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 
-/**
- * 自定义查询器
- *
- * @param <T> 参数实体
- * @author huald
- * @time 2019-07-18
- */
 @Slf4j
-public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T>> implements Query<CommonWrapper<T>, T, String> {
-    private SharedString sqlSelect;
+public class CommonWrapper<T> {
+
     private List<IFilter> filters = null;
     private List<String> columns;
     private List<String> groupBys;
@@ -37,80 +23,80 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     private Long limit = null;
     private String firstSql = null;
     private DatabaseType databaseType = DatabaseType.MYSQL;
-
-    public CommonWrapper() {
-        this((T) null);
-    }
-
-    @Override
-    protected CommonWrapper<T> instance() {
-        return null;
-    }
-
-    public CommonWrapper(T entity) {
-        this.sqlSelect = new SharedString();
-        super.setEntity(entity);
-        super.initNeed();
-    }
-
-    public CommonWrapper(T entity, QueryOptions options) {
-        this.sqlSelect = new SharedString();
-        super.setEntity(entity);
-        super.initNeed();
-        if (options != null) {
-            this.filters = options.getFilters();
-            this.columns = options.getColumns();
-            this.groupBys = options.getGroupBys();
-            this.orderBys = options.getOrderBys();
-            this.curPage = options.getCurPage();
-            this.limit = options.getLimit();
-            this.firstSql = options.getFirstSql();
-            splitColumns(this, columns);
-            splitFilters(this, filters, false);
-            splitGroupBy(this, groupBys);
-            splitOrderBy(this, orderBys);
-        }
-    }
-
+    private SqlWrapper sqlWrapper;
+    private String orderBySql;
+    private String groupBySql;
+    private String whereSql;
+    private String columnSql;
+    private String sql;
 
     public CommonWrapper(QueryOptions options) {
-        this.sqlSelect = new SharedString();
-        // super.setEntity(entity);
-        super.initNeed();
-        if (options != null) {
-            this.filters = options.getFilters();
-            this.columns = options.getColumns();
-            this.groupBys = options.getGroupBys();
-            this.orderBys = options.getOrderBys();
-            this.curPage = options.getCurPage();
-            this.limit = options.getLimit();
-            this.firstSql = options.getFirstSql();
-            splitColumns(this, columns);
-            splitFilters(this, filters, false);
-            splitGroupBy(this, groupBys);
-            splitOrderBy(this, orderBys);
-        }
+        if (options == null) throw new NullPointerException("params is not null");
+        this.filters = options.getFilters();
+        this.columns = options.getColumns();
+        this.groupBys = options.getGroupBys();
+        this.orderBys = options.getOrderBys();
+        this.curPage = options.getCurPage();
+        this.limit = options.getLimit();
+        this.firstSql = options.getFirstSql();
+        this.sqlWrapper = initSqlWrapper();
+        splitColumns(this.sqlWrapper, columns);
+        this.columnSql = this.sqlWrapper.selectSql;
+        splitFilters(this.sqlWrapper, filters, false);
+        this.whereSql = this.sqlWrapper.whereSql;
+        splitGroupBy(this.sqlWrapper, groupBys);
+        splitOrderBy(this.sqlWrapper, orderBys);
+        this.sql = this.sqlWrapper.whereSql;
     }
 
     public CommonWrapper(QueryOptions options, DatabaseType databaseType) {
-        this.sqlSelect = new SharedString();
-        // super.setEntity(entity);
-        super.initNeed();
-        if (databaseType != null) {
-            this.databaseType = databaseType;
+        if (options == null) throw new NullPointerException("params is not null");
+        this.databaseType = databaseType;
+        this.filters = options.getFilters();
+        this.columns = options.getColumns();
+        this.groupBys = options.getGroupBys();
+        this.orderBys = options.getOrderBys();
+        this.curPage = options.getCurPage();
+        this.limit = options.getLimit();
+        this.firstSql = options.getFirstSql();
+        this.sqlWrapper = initSqlWrapper();
+        splitColumns(this.sqlWrapper, columns);
+        this.columnSql = this.sqlWrapper.selectSql;
+        splitFilters(this.sqlWrapper, filters, false);
+        this.whereSql = this.sqlWrapper.whereSql;
+        splitGroupBy(this.sqlWrapper, groupBys);
+        splitOrderBy(this.sqlWrapper, orderBys);
+        this.sql = this.sqlWrapper.whereSql;
+    }
+
+    private SqlWrapper initSqlWrapper() {
+        if (databaseType == DatabaseType.MYSQL) {
+            return new MySqlWrapper();
+        } else if (databaseType == DatabaseType.ORACLE) {
+            return new OracleWrapper();
         }
-        if (options != null) {
-            this.filters = options.getFilters();
-            this.columns = options.getColumns();
-            this.orderBys = options.getOrderBys();
-            this.curPage = options.getCurPage();
-            this.limit = options.getLimit();
-            this.firstSql = options.getFirstSql();
-            splitColumns(this, columns);
-            splitFilters(this, filters, false);
-            splitGroupBy(this, groupBys);
-            splitOrderBy(this, orderBys);
-        }
+        return new MySqlWrapper();
+
+    }
+
+    public String getOrderBySql() {
+        return orderBySql;
+    }
+
+    public String getGroupBySql() {
+        return groupBySql;
+    }
+
+    public String getWhereSql() {
+        return whereSql;
+    }
+
+    public String getColumnSql() {
+        return columnSql;
+    }
+
+    public String getSql() {
+        return sql;
     }
 
     public List<IFilter> getFilters() {
@@ -121,12 +107,12 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return columns;
     }
 
-    public List<IOrderBy> getOrderBys() {
-        return orderBys;
-    }
-
     public List<String> getGroupBys() {
         return groupBys;
+    }
+
+    public List<IOrderBy> getOrderBys() {
+        return orderBys;
     }
 
     public Long getCurPage() {
@@ -141,38 +127,8 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return firstSql;
     }
 
-    public void setFirstSql(String firstSql) {
-        this.firstSql = firstSql;
-    }
-
-    private void splitGroupBy(CommonWrapper<T> wrapper, List<String> groupBys) {
-        if (groupBys != null && groupBys.size() > 0) {
-            groupBys = SqlFilter.sqlInject(groupBys);
-            wrapper.groupBy(groupBys.toArray(new String[0]));
-        }
-
-    }
-
-    /**
-     * 添加排序字段
-     *
-     * @param wrapper
-     * @param orderBys 排序参数
-     */
-    private void splitOrderBy(CommonWrapper<T> wrapper, List<IOrderBy> orderBys) {
-        if (orderBys != null && orderBys.size() > 0) {
-            int length = orderBys.size();
-            for (int i = 0; i < length; i++) {
-                IOrderBy orderBy = orderBys.get(i);
-                //校验是否有SQL注入风险
-                orderBy.setOrderByName(SqlFilter.sqlInject(orderBy.getOrderByName()));
-                if (OrderType.ASC == orderBy.getOrderByType()) {
-                    wrapper.orderByAsc(orderBy.getOrderByName());
-                } else {
-                    wrapper.orderByDesc(orderBy.getOrderByName());
-                }
-            }
-        }
+    public SqlWrapper getSqlWrapper() {
+        return sqlWrapper;
     }
 
     /**
@@ -181,11 +137,8 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      * @param wrapper
      * @param columns
      */
-    private void splitColumns(CommonWrapper<T> wrapper, List<String> columns) {
+    private void splitColumns(SqlWrapper wrapper, List<String> columns) {
         if (columns != null && columns.size() > 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("common wrapper columns:[{}]", columns.toString());
-            }
             //校验是否有SQL注入风险,将校验操作提前
             //列没有注入风险
 //            columns = SqlFilter.sqlInject(columns);
@@ -196,46 +149,38 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
     }
 
 
-    public CommonWrapper(T entity, String... columns) {
-        this.sqlSelect = new SharedString();
-        super.setEntity(entity);
-        super.initNeed();
-        this.select(columns);
-    }
-
-    private CommonWrapper(T entity, Class<T> entityClass, AtomicInteger paramNameSeq, Map<String, Object> paramNameValuePairs, MergeSegments mergeSegments, SharedString lastSql, SharedString sqlComment) {
-        this.sqlSelect = new SharedString();
-        super.setEntity(entity);
-        // this.entityClass = entityClass;
-        this.paramNameSeq = paramNameSeq;
-        this.paramNameValuePairs = paramNameValuePairs;
-        this.expression = mergeSegments;
-        this.lastSql = lastSql;
-        this.sqlComment = sqlComment;
-    }
-
-    @Override
-    public CommonWrapper<T> select(String... columns) {
-        if (ArrayUtils.isNotEmpty(columns)) {
-            this.sqlSelect.setStringValue(String.join(",", columns));
+    private void splitGroupBy(SqlWrapper wrapper, List<String> groupBys) {
+        if (groupBys != null && groupBys.size() > 0) {
+            groupBys = SqlFilter.sqlInject(groupBys);
+            this.groupBySql = new GroupByWrapper().groupBy(groupBys.toArray(new String[0])).getSql();
+            wrapper.groupBy(this.groupBySql);
         }
 
-        return (CommonWrapper) this.typedThis;
     }
 
-    @Override
-    public CommonWrapper<T> select(Predicate<TableFieldInfo> predicate) {
-        return null;
-    }
-
-    @Override
-    public CommonWrapper<T> select(Class<T> entityClass, Predicate<TableFieldInfo> predicate) {
-        return null;
-    }
-
-    @Override
-    public String getSqlSelect() {
-        return this.sqlSelect.getStringValue();
+    /**
+     * 添加排序字段
+     *
+     * @param wrapper
+     * @param orderBys 排序参数
+     */
+    private void splitOrderBy(SqlWrapper wrapper, List<IOrderBy> orderBys) {
+        if (orderBys != null && orderBys.size() > 0) {
+            int length = orderBys.size();
+            OrderBySqlWrapper orderByWrapper = new OrderBySqlWrapper();
+            for (int i = 0; i < length; i++) {
+                IOrderBy orderBy = orderBys.get(i);
+                //校验是否有SQL注入风险
+                orderBy.setOrderByName(SqlFilter.sqlInject(orderBy.getOrderByName()));
+                if (OrderType.ASC == orderBy.getOrderByType()) {
+                    orderByWrapper.asc(orderBy.getOrderByName());
+                } else {
+                    orderByWrapper.desc(orderBy.getOrderByName());
+                }
+            }
+            this.orderBySql = orderByWrapper.orderBySql;
+            wrapper.orderBy(orderByWrapper);
+        }
     }
 
 
@@ -247,7 +192,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      * @param isSecond
      * @return
      */
-    private CommonWrapper<T> splitFilters(CommonWrapper<T> wrapper, List<IFilter> filters, boolean isSecond) {
+    private SqlWrapper splitFilters(SqlWrapper wrapper, List<IFilter> filters, boolean isSecond) {
         if (filters == null || filters.size() <= 0) {
             return wrapper;
         }
@@ -264,12 +209,12 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             }
             log.info("common wrapper split filters type:[{}]", filter.getFilterType());
             if (filter.getFilterType() == FilterType.OR_NEW || filter.getFilterType() == FilterType.AND_NEW) {
-                CommonWrapper<T> childWrapper = splitFilters(new CommonWrapper<T>(), filter.getChildren(), true);
-                String sql = QueryUtils.splitWhereSql(childWrapper.getSqlSegment(), childWrapper.getParamNameValuePairs());
+                SqlWrapper childWrapper = splitFilters(initSqlWrapper(), filter.getChildren(), true);
                 if (filter.getFilterType() == FilterType.OR_NEW) {
-                    wrapper.or();
+                    wrapper.orNew(childWrapper);
+                } else {
+                    wrapper.andNew(childWrapper);
                 }
-                wrapper.apply(" (" + sql + " )");
             } else {
                 if (filter.getFilterName() == null) {
                     continue;
@@ -277,7 +222,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
                 if (filter.getFilterType() == FilterType.OR) {
                     wrapper.or();
                 } else {
-                    wrapper.and(true);
+                    wrapper.and();
                 }
                 //过滤类型为空，则设置默认值为EQUAL
                 if (filter.getCondition() == null) {
@@ -290,7 +235,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
                             if (filter.getFilterType() == FilterType.OR) {
                                 wrapper.or();
                             } else {
-                                wrapper.and(true);
+                                wrapper.and();
                             }
                         }
                     }
@@ -306,6 +251,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return wrapper;
     }
 
+
     /**
      * 拼接查询函数（=,!=,>,<）
      *
@@ -313,7 +259,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      * @param filter
      * @param filterValues
      */
-    private void splitCondition(CommonWrapper<T> wrapper, IFilter filter, List<Object> filterValues, boolean isSecond) {
+    private void splitCondition(SqlWrapper wrapper, IFilter filter, List<Object> filterValues, boolean isSecond) {
         String filterName = filter.getFilterName();
         //校验是否有SQL注入风险
         filterName = SqlFilter.sqlInject(filterName);
@@ -346,7 +292,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
                         if (filter.getFilterType() == FilterType.OR) {
                             wrapper.or();
                         } else {
-                            wrapper.and(true);
+                            wrapper.and();
                         }
                     }
                 }
@@ -357,14 +303,14 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             }
             for (int j = 0; j < filterValues.size(); j++) {
                 Object filterValue = filterValues.get(j);
-                wrapper.likeLeft(filterValue != null, ReflexUtil.humpToUnderline(filterName),
+                wrapper.leftLike(filterValue != null, ReflexUtil.humpToUnderline(filterName),
                         filterValue != null ? splitSingleQuote(filterValue.toString()) : "");
                 if (isSecond) {
                     if (j != filterValues.size() - 1) {
                         if (filter.getFilterType() == FilterType.OR) {
                             wrapper.or();
                         } else {
-                            wrapper.and(true);
+                            wrapper.and();
                         }
                     }
                 }
@@ -375,14 +321,14 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             }
             for (int j = 0; j < filterValues.size(); j++) {
                 Object filterValue = filterValues.get(j);
-                wrapper.likeRight(filterValue != null, ReflexUtil.humpToUnderline(filterName),
+                wrapper.rightLike(filterValue != null, ReflexUtil.humpToUnderline(filterName),
                         filterValue != null ? splitSingleQuote(filterValue.toString()) : "");
                 if (isSecond) {
                     if (j != filterValues.size() - 1) {
                         if (filter.getFilterType() == FilterType.OR) {
                             wrapper.or();
                         } else {
-                            wrapper.and(true);
+                            wrapper.and();
                         }
                     }
                 }
@@ -400,7 +346,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
                         if (filter.getFilterType() == FilterType.OR) {
                             wrapper.or();
                         } else {
-                            wrapper.and(true);
+                            wrapper.and();
                         }
                     }
                 }
@@ -459,7 +405,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             }
             wrapper.isNull(ReflexUtil.humpToUnderline(filterName));
         } else if (filter.getCondition() == ICondition.BETWEEN) {
-            if (isDateCondition(filter)&&this.databaseType==DatabaseType.ORACLE) {
+            if (isDateCondition(filter) && this.databaseType == DatabaseType.ORACLE) {
                 throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.BETWEEN + ") 不支持时间类型参数");
             }
             if (filterValues.size() < 2) {
@@ -469,7 +415,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             Object end = filterValues.get(1);
             wrapper.between(ReflexUtil.humpToUnderline(filterName), start, end);
         } else if (filter.getCondition() == ICondition.NOT_BETWEEN) {
-            if (isDateCondition(filter)&&this.databaseType==DatabaseType.ORACLE) {
+            if (isDateCondition(filter) && this.databaseType == DatabaseType.ORACLE) {
                 throw new CommonException(ErrorCode.PARAMS_GET_ERROR, "当前condition(" + ICondition.NOT_BETWEEN + ") 不支持时间类型参数");
             }
             if (filterValues.size() < 2) {
@@ -488,7 +434,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      * @param wrapper
      * @param filter
      */
-    private void splitCondition2(CommonWrapper<T> wrapper, IFilter filter) {
+    private void splitCondition2(SqlWrapper wrapper, IFilter filter) {
         String filterName = filter.getFilterName();
         //校验是否有SQL注入风险
         filterName = SqlFilter.sqlInject(filterName);
@@ -528,7 +474,7 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
      * @param wrapper
      * @param filter
      */
-    private void splitDateCondition(CommonWrapper<T> wrapper, IFilter filter, String condition) {
+    private void splitDateCondition(SqlWrapper wrapper, IFilter filter, String condition) {
         StringBuilder builder = new StringBuilder();
         String value = filter.getFilterValue().get(0) + "";
         switch (this.databaseType) {
@@ -539,8 +485,6 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
             case ORACLE:
                 builder.append("to_char(").append(ReflexUtil.humpToUnderline(filter.getFilterName()))
                         .append(",'").append(filter.getDateFormat()).append("') ").append(condition).append(" {0}");
-//                builder.append(ReflexUtil.humpToUnderline(filter.getFilterName())).append(condition).append(" {0}") ;
-//                value = "to_date('"+value+"','"+filter.getDateFormat()+"')";
                 break;
             default:
                 break;
@@ -553,14 +497,4 @@ public class CommonWrapper<T> extends AbstractWrapper<T, String, CommonWrapper<T
         return s;
     }
 
-    private List<String> splitSingleQuotes(List<Object> objects) {
-        if (objects == null || objects.size() <= 0) {
-            return new ArrayList<>(1);
-        }
-        List<String> list = new ArrayList<>(objects.size());
-        for (Object o : objects) {
-            list.add(SqlParams.SQL_SINGLE_QUOTE + o.toString() + SqlParams.SQL_SINGLE_QUOTE);
-        }
-        return list;
-    }
 }

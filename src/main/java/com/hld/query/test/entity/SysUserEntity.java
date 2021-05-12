@@ -1,8 +1,5 @@
 package com.hld.query.test.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -18,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@TableName("sys_user")
+//@("sys_user")
 public class SysUserEntity {
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +52,6 @@ public class SysUserEntity {
     /**
      * 加密后的密码
      */
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String password;
     /**
      * 手机号
@@ -172,10 +168,8 @@ public class SysUserEntity {
     /**
      * 备注
      */
-    @TableField(updateStrategy = FieldStrategy.NOT_NULL)
     private String comment;
 
-    @TableField(updateStrategy = FieldStrategy.NOT_EMPTY)
     private String salt;
 
     private Integer superAdmin;

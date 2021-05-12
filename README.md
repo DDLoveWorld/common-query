@@ -1,7 +1,18 @@
 @[TOC](接口参数自定义查询)
 
 
-这是一款基于Mybatis-plus插件查询功能的二次开发，让你的查询变得更加简单，简洁，方便和灵活。从此告别和前端人员的频繁沟通！！
+这是一款基于Mybatis插件查询功能的二次开发，让你的查询变得更加简单，简洁，方便和灵活。从此告别和前端人员的频繁沟通！！
+common-query组件在2.0.0版本后以去除Mybatis-plus的引用，将专注于基于Mybatis的查询功能。之前版本不影响使用，若
+想继续使用基于Mybatis-Plus的查询组件可以引用下面的包
+
+```yaml
+    <dependency>
+        <groupId>com.github.DDLoveWorld</groupId>
+        <artifactId>common-query-mybatisplus</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+```
+
 
 ## 引言
    大家都了解一个简单完整SQL的样子是以下形式的：
@@ -60,7 +71,7 @@ SELECT ID,NAME FROM T_USER WHERE ID = 1;
         <dependency>
             <groupId>com.github.DDLoveWorld</groupId>
             <artifactId>common-query</artifactId>
-            <version>1.2.1</version>
+            <version>2.0.0</version>
         </dependency>
 ```
 
@@ -280,7 +291,7 @@ public @interface FormatSwitch {
 <dependency>
     <groupId>com.github.DDLoveWorld</groupId>
     <artifactId>common-query</artifactId>
-    <version>1.3.1</version>
+    <version>2.0.0</version>
 </dependency>
 
 ```
@@ -291,9 +302,11 @@ public @interface FormatSwitch {
 # 项目引用
  本项目已上传到Maven中央仓库
 
+```yaml
     <dependency>
         <groupId>com.github.DDLoveWorld</groupId>
         <artifactId>common-query</artifactId>
-        <version>1.3.7</version>
+        <version>2.0.0</version>
     </dependency>
+```
 
