@@ -20,7 +20,7 @@
         <chartset.UTF8>UTF-8</chartset.UTF8>
         <mybatis.plus.version>3.1.2</mybatis.plus.version>
         <lombok.version>1.18.10</lombok.version>
-        <fastjson.version>1.2.60</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <jackson.version>2.10.4</jackson.version>
     </properties>
 
